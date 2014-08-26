@@ -118,16 +118,6 @@ env = parentEnv.Clone()
 
 libNameBase = 'FabricSplice-'+SPLICE_VERSION
 
-sharedEnv = env.Clone()
-sharedEnv.Append(CPPDEFINES=['FEC_SHARED', 'FECS_SHARED', 'FECS_BUILDING'])
-sharedEnv.MergeFlags(sharedCapiFlags)
-sharedLibName = libNameBase
-if SPLICE_OS == 'Windows':
-  sharedLibName += '.dll'
-else:
-  sharedLibName += '.so'
-sharedEnv.VariantDir('shared', env.Dir('.').srcnode().abspath)
-
 staticEnv = env.Clone()
 staticEnv.Append(CPPDEFINES=['FEC_SHARED', 'FECS_STATIC', 'FECS_BUILDING'])
 staticEnv.MergeFlags(staticCapiFlags)

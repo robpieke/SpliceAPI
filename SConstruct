@@ -19,6 +19,9 @@ for var in ['FABRIC_CAPI_DIR', 'FABRIC_SPLICE_VERSION', 'BOOST_DIR']:
 
 spliceEnv = Environment()
 
+if not os.path.exists(spliceEnv.Dir('stage').abspath):
+  os.makedirs(spliceEnv.Dir('stage').abspath)
+
 (spliceApiAlias, spliceApiFiles) = SConscript(
   dirs = ['.'],
   exports = {
