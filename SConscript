@@ -138,36 +138,12 @@ installedLicense = staticEnv.Install(STAGE_DIR, 'license.txt')
 
 installedFiles = [installedStaticLibrary, installedHeader, installedLicense]
 
-# StaticSpliceFlags = {
-#   'CPPPATH': [STAGE_DIR],
-#   'LIBS': [installedStaticLibrary],
-#   'CPPDEFINES': ['SPLICE_API_VERSION='+str(SPLICE_VERSION).partition('-')[0].replace('.', ''), 'FECS_STATIC']
-# }
-# Export('StaticSpliceFlags')
-
-# SharedSpliceFlags = {
-#   'CPPPATH': [STAGE_DIR],
-#   'LIBPATH': [STAGE_DIR],
-#   'LIBS': [libNameBase],
-#   'CPPDEFINES': ['SPLICE_API_VERSION='+str(SPLICE_VERSION).partition('-')[0].replace('.', ''), 'FECS_SHARED']
-# }
-# Export('SharedSpliceFlags')
-
-# # build a zip
-# spliceArchives = []
-# if 'upload' in COMMAND_LINE_TARGETS and ('dist' in COMMAND_LINE_TARGETS or 'api' in COMMAND_LINE_TARGETS):
-#   archiveName = 'FabricSplice'+SPLICE_VERSION+'-API-'+distOS+'-'+buildArch
-#   spliceArchives.append(env.ZipBetter(os.path.join(installRoot, archiveName+'.zip'), STAGE_DIR, baseDir = installRoot))
-
-#   if buildDCCSamples:
-#     # build the sample scenes zip
-#     if not cpDir:
-#       raise Exception("FABRIC_SCENE_GRAPH_DIR not found.")
-#     sampleSceneDir = os.path.join(cpDir, 'Python', 'Apps', 'Resources', 'Splice', 'Splice')
-#     installSampleSceneDir = os.path.join(installRoot, 'Samples', 'Splice')
-#     env.Install(installSampleSceneDir, Glob(os.path.join(sampleSceneDir, '*')))
-#     archiveName = 'FabricSplice'+SPLICE_VERSION+'-JSON-Samples'
-#     spliceArchives.append(env.ZipBetter(os.path.join(installRoot, archiveName+'.zip'), installSampleSceneDir, baseDir = installRoot))
+spliceFlags = {
+  'CPPPATH': [STAGE_DIR],
+  'LIBS': [installedStaticLibrary],
+  'CPPDEFINES': ['SPLICE_API_VERSION='+str(SPLICE_VERSION).partition('-')[0].replace('.', ''), 'FECS_STATIC']
+}
+Export('spliceFlags')
 
 alias = env.Alias('spliceapi', installedFiles)
 spliceData = (alias, installedFiles)
