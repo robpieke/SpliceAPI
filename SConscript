@@ -122,7 +122,7 @@ libNameBase = 'FabricSplice-'+FABRIC_SPLICE_VERSION
 
 staticEnv = env.Clone()
 staticEnv.Append(CPPDEFINES=['FEC_SHARED', 'FECS_STATIC', 'FECS_BUILDING'])
-staticEnv.MergeFlags(staticCapiFlags)
+staticEnv.MergeFlags(sharedCapiFlags)
 staticLibName = libNameBase+'_s'
 if FABRIC_BUILD_OS == 'Windows':
   staticLibName += '.lib'
