@@ -7,7 +7,7 @@ Fabric Splice API allows you to make use of the Fabric Core inside of DCCs, and 
 Repository Status
 =================
 
-This repository will be maintained and kept up to date by Fabric Technologies to match the latest Fabric Core.
+This repository will be maintained and kept up to date by Fabric Software to match the latest Fabric Core.
 
 Supported platforms
 ===================
