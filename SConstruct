@@ -32,3 +32,4 @@ if not os.path.exists(spliceEnv.Dir('.stage').abspath):
 
 allAliases = [spliceApiAlias]
 spliceEnv.Alias('all', allAliases)
+spliceEnv.Default(allAliases)
