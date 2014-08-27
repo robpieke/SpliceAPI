@@ -4,10 +4,10 @@
 
 import os, sys, platform, copy
 
-Import('parentEnv', 'FABRIC_CAPI_DIR', 'CORE_VERSION', 'SPLICE_VERSION', 'STAGE_DIR', 'SPLICE_DEBUG', 'SPLICE_OS', 'SPLICE_ARCH', 'BOOST_DIR')
+Import('parentEnv', 'FABRIC_CAPI_DIR', 'FABRIC_SPLICE_VERSION', 'STAGE_DIR', 'FABRIC_BUILD_TYPE', 'FABRIC_BUILD_OS', 'FABRIC_BUILD_ARCH', 'BOOST_DIR')
 
 # configuration flags
-if SPLICE_OS == "Windows":
+if FABRIC_BUILD_OS == "Windows":
   baseCPPDefines = [
     '_SCL_SECURE_NO_WARNINGS=1',
     '_ITERATOR_DEBUG_LEVEL=0',
@@ -28,7 +28,7 @@ if SPLICE_OS == "Windows":
     'CPPDEFINES': baseCPPDefines + ['NDEBUG'],
     'LINKFLAGS': baseLinkFlags + ['/NDEBUG', '/NODEFAULTLIB:LIBCMTD'],
   }
-  if SPLICE_ARCH.endswith('64'):
+  if FABRIC_BUILD_ARCH.endswith('64'):
     baseCPPDefines.append( 'WIN64' )
 else:
   spliceDebugFlags = {
@@ -43,7 +43,7 @@ else:
 
 Export('spliceDebugFlags', 'spliceReleaseFlags')
 
-if SPLICE_DEBUG:
+if FABRIC_BUILD_TYPE == 'Debug':
   parentEnv.MergeFlags(spliceDebugFlags)
 else:
   parentEnv.MergeFlags(spliceReleaseFlags)
@@ -59,31 +59,33 @@ baseCapiFlags = {
   'LIBS': [],
 }
 
+FABRIC_CORE_VERSION = FABRIC_SPLICE_VERSION.rpartition('.')[0]
+
 staticCapiFlags = copy.deepcopy(baseCapiFlags)
 staticCapiFlags['CPPDEFINES'] += ['FEC_STATIC']
-if SPLICE_OS == 'Windows':
-  staticCapiFlags['LIBS'] += [File(os.path.join(FABRIC_CAPI_DIR, 'lib', 'FabricCore-'+CORE_VERSION+'_s.lib'))]
+if FABRIC_BUILD_OS == 'Windows':
+  staticCapiFlags['LIBS'] += [File(os.path.join(FABRIC_CAPI_DIR, 'lib', 'FabricCore-'+FABRIC_CORE_VERSION+'_s.lib'))]
 else:
-  staticCapiFlags['LIBS'] += [File(os.path.join(FABRIC_CAPI_DIR, 'lib', 'libFabricCore-'+CORE_VERSION+'_s.a'))]
+  staticCapiFlags['LIBS'] += [File(os.path.join(FABRIC_CAPI_DIR, 'lib', 'libFabricCore-'+FABRIC_CORE_VERSION+'_s.a'))]
 Export('staticCapiFlags')
 
 sharedCapiFlags = copy.deepcopy(baseCapiFlags)
 sharedCapiFlags['CPPDEFINES'] += ['FEC_SHARED']
 sharedCapiFlags['LIBPATH'] += [os.path.join(FABRIC_CAPI_DIR, 'lib')]
-sharedCapiFlags['LIBS'] += ['FabricCore-'+CORE_VERSION]
+sharedCapiFlags['LIBS'] += ['FabricCore-'+FABRIC_CORE_VERSION]
 Export('sharedCapiFlags')
 
-apiVersion = SPLICE_VERSION.split('.')
+apiVersion = FABRIC_SPLICE_VERSION.split('.')
 for i in range(1, len(apiVersion)):
   while len(apiVersion[i]) < 3:
     apiVersion[i] = '0'+apiVersion[i]
 
 parentEnv.Append(CPPDEFINES=['SPLICE_API_VERSION='+''.join(apiVersion)])
-parentEnv.Append(CPPDEFINES=['SPLICE_MAJOR_VERSION='+SPLICE_VERSION.split('.')[0]])
-parentEnv.Append(CPPDEFINES=['SPLICE_MINOR_VERSION='+SPLICE_VERSION.split('.')[1]])
-parentEnv.Append(CPPDEFINES=['SPLICE_REVISION_VERSION='+SPLICE_VERSION.split('.')[2]])
+parentEnv.Append(CPPDEFINES=['SPLICE_MAJOR_VERSION='+FABRIC_SPLICE_VERSION.split('.')[0]])
+parentEnv.Append(CPPDEFINES=['SPLICE_MINOR_VERSION='+FABRIC_SPLICE_VERSION.split('.')[1]])
+parentEnv.Append(CPPDEFINES=['SPLICE_REVISION_VERSION='+FABRIC_SPLICE_VERSION.split('.')[2]])
 
-if SPLICE_OS == 'Windows':
+if FABRIC_BUILD_OS == 'Windows':
   parentEnv.Append(LIBS = ['advapi32', 'shell32'])
 
 if BOOST_DIR is None or not os.path.exists(BOOST_DIR):
@@ -95,8 +97,8 @@ boostFlags = {
   'CPPPATH': [BOOST_DIR],
   'LIBPATH': [os.path.join(BOOST_DIR, 'lib')],
 }
-if SPLICE_OS == 'Windows':
-  if SPLICE_DEBUG:
+if FABRIC_BUILD_OS == 'Windows':
+  if FABRIC_BUILD_TYPE:
     boostFlags['LIBS'] = [
       'libboost_thread-vc100-mt-sgd-1_55.lib',
       'libboost_system-vc100-mt-sgd-1_55.lib',
@@ -116,13 +118,13 @@ parentEnv.MergeFlags(boostFlags)
 
 env = parentEnv.Clone()
 
-libNameBase = 'FabricSplice-'+SPLICE_VERSION
+libNameBase = 'FabricSplice-'+FABRIC_SPLICE_VERSION
 
 staticEnv = env.Clone()
 staticEnv.Append(CPPDEFINES=['FEC_SHARED', 'FECS_STATIC', 'FECS_BUILDING'])
 staticEnv.MergeFlags(staticCapiFlags)
 staticLibName = libNameBase+'_s'
-if SPLICE_OS == 'Windows':
+if FABRIC_BUILD_OS == 'Windows':
   staticLibName += '.lib'
 else:
   staticLibName += '.a'
@@ -141,7 +143,7 @@ installedFiles = [installedStaticLibrary, installedHeader, installedLicense]
 spliceFlags = {
   'CPPPATH': [STAGE_DIR],
   'LIBS': [installedStaticLibrary],
-  'CPPDEFINES': ['SPLICE_API_VERSION='+str(SPLICE_VERSION).partition('-')[0].replace('.', ''), 'FECS_STATIC']
+  'CPPDEFINES': ['SPLICE_API_VERSION='+str(FABRIC_SPLICE_VERSION).partition('-')[0].replace('.', ''), 'FECS_STATIC']
 }
 Export('spliceFlags')
 
