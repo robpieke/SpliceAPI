@@ -98,7 +98,7 @@ boostFlags = {
   'LIBPATH': [os.path.join(BOOST_DIR, 'lib')],
 }
 if FABRIC_BUILD_OS == 'Windows':
-  if FABRIC_BUILD_TYPE:
+  if FABRIC_BUILD_TYPE == 'Debug':
     boostFlags['LIBS'] = [
       'libboost_thread-vc100-mt-sgd-1_55.lib',
       'libboost_system-vc100-mt-sgd-1_55.lib',

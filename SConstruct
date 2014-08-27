@@ -1,7 +1,7 @@
 import os, platform
 
 # check environment variables
-for var in ['FABRIC_CAPI_DIR', 'FABRIC_SPLICE_VERSION', 'BOOST_DIR', 'FABRIC_BUILD_OS', 'FABRIC_BUILD_ARCH', 'FABRIC_BUILD_TYPE']:
+for var in ['FABRIC_CAPI_DIR', 'FABRIC_SPLICE_VERSION', 'FABRIC_BUILD_OS', 'FABRIC_BUILD_ARCH', 'FABRIC_BUILD_TYPE', 'BOOST_DIR']:
   if not os.environ.has_key(var):
     print 'The environment variable %s is not defined.' % var
     exit(0)
