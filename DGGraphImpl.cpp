@@ -707,13 +707,12 @@ bool DGGraphImpl::evaluate(FabricCore::DGNode dgNode, std::string * errorOut)
   try
   {
     dgNode.evaluate();
+    mEvalContext.callMethod("", "_clear", 0, 0);
   }
   catch(FabricCore::Exception e)
   {
     return LoggingImpl::reportError(e.getDesc_cstr(), errorOut);
   }
-
-  mEvalContext.callMethod("", "_clear", 0, 0);
 
   mRequiresEval = false;
   return true;
@@ -2656,18 +2655,18 @@ bool DGGraphImpl::setFromPersistenceDataDict(
         FabricCore::DGNode dgNode = getDGNode(dgNodeName);
         if(dgNode.isValid()){
           FabricCore::RTVal memberRTVal = dgNode.getMemberSliceValue(memberNameVar->getStringData(), 0);
-          if(memberRTVal.isValid() && !memberRTVal.isNullObject()){
-            try
-            {
-              FabricCore::RTVal args[2];
-              args[0] = persistenceContextRT;
-              args[1] = FabricSplice::constructStringRTVal(persistenceDataVar->getStringData());
-              FabricCore::RTVal stringRTVal = memberRTVal.callMethod("", "loadDataFromString", 2, &args[0]);
-            }
-            catch(FabricCore::Exception e)
-            {
-              // The only way to see if an RTVal supporta a given method is to try and invoke it. 
-            }
+          try
+          {
+            if(memberRTVal.isValid() && !memberRTVal.isNullObject()){
+                FabricCore::RTVal args[2];
+                args[0] = persistenceContextRT;
+                args[1] = FabricSplice::constructStringRTVal(persistenceDataVar->getStringData());
+                FabricCore::RTVal stringRTVal = memberRTVal.callMethod("", "loadDataFromString", 2, &args[0]);
+              }
+          }
+          catch(FabricCore::Exception e)
+          {
+            // The only way to see if an RTVal supporta a given method is to try and invoke it. 
           }
         }
       }
