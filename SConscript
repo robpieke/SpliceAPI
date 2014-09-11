@@ -148,7 +148,7 @@ installedFiles = [installedStaticLibrary, installedHeader, installedLicense]
 spliceFlags = {
   'CPPPATH': [STAGE_DIR],
   'LIBS': [installedStaticLibrary],
-  'CPPDEFINES': ['SPLICE_API_VERSION='+str(FABRIC_SPLICE_VERSION).partition('-')[0].replace('.', ''), 'FECS_STATIC']
+  'CPPDEFINES': ['_BOOL', 'FECS_STATIC']
 }
 Export('spliceFlags')
 

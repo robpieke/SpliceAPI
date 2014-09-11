@@ -288,24 +288,18 @@ bool DGGraphImpl::addExtFolder(const std::string & folder, std::string * errorOu
 
 bool DGGraphImpl::isLicenseValid(std::string * errorOut)
 {
-  if(sClient == NULL)
-    return LoggingImpl::reportError("No FabricCore Client present.", errorOut);
-  return sClient->isLicenseValid();
+  return FabricCore::IsLicenseValid();
 }
 
 bool DGGraphImpl::setLicenseServer(const std::string & serverName, std::string * errorOut)
 {
-  if(sClient == NULL)
-    return LoggingImpl::reportError("No FabricCore Client present.", errorOut);
-  sClient->setLicenseServer(serverName.c_str());
+  FabricCore::SetLicenseServer(serverName.c_str());
   return false;
 }
 
 bool DGGraphImpl::setStandaloneLicense(const std::string & license, std::string * errorOut)
 {
-  if(sClient == NULL)
-    return LoggingImpl::reportError("No FabricCore Client present.", errorOut);
-  sClient->setStandaloneLicense(license.c_str());
+  FabricCore::SetStandaloneLicense(license.c_str());
   return false;
 }
 
@@ -359,7 +353,7 @@ bool DGGraphImpl::loadExtension(const std::string & extName, std::string * error
     // finally load the extension from the core
     try
     {
-      sClient->loadExtension(name.c_str());
+      sClient->loadExtension(name.c_str(), false);
     }
     catch(FabricCore::Exception e)
     {
@@ -530,7 +524,7 @@ bool DGGraphImpl::loadExtension(const std::string & extName, std::string * error
       {
         try
         {
-          sClient->loadExtension(name.c_str());
+          sClient->loadExtension(name.c_str(), false);
         }
         catch(FabricCore::Exception e)
         {
@@ -551,7 +545,7 @@ bool DGGraphImpl::loadExtension(const std::string & extName, std::string * error
       FabricCore::KLSourceFile klSourceFile[1];
       klSourceFile[0].filenameCStr = fileName.c_str();
       klSourceFile[0].sourceCodeCStr = klCode.c_str();
-      RegisterKLExtension(*sClient, name.c_str(), 1, klSourceFile);
+      RegisterKLExtension(*sClient, name.c_str(), 1, klSourceFile, false);
     }
     catch(FabricCore::Exception e)
     {
