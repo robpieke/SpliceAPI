@@ -22,7 +22,7 @@ void SceneManagementImpl::drawOpenGL(FabricCore::RTVal & drawContext)
     return;
   try
   {
-    DGGraphImpl::sDrawingScope.callMethod("", "_draw", 1, &drawContext);
+    DGGraphImpl::sDrawingScope.callMethod("", "draw", 1, &drawContext);
   }
   catch(FabricCore::Exception e)
   {
