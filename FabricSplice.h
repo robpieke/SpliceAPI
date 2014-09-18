@@ -7,15 +7,15 @@
 
 .. _SPLICECAPI:
 
-Fabric:Splice C/C++ API
-=========================
+|FABRIC_PRODUCT_NAME| Splice C/C++ API Documentation
+=======================================================
 
-.. image:: ../media/Splice_logo.png
+.. image:: /images/Splice/Splice_logo.png
    :width: 360px
-   :height: 57px
+   :height: 64px
 
-| {{SPLICE_MODULE_NAME}} version {{SPLICE_VERSION}}
-| {{SPLICE_COPYRIGHT}}
+| |FABRIC_PRODUCT_NAME| version |FABRIC_VERSION|
+| |FABRIC_COPYRIGHT|
 
 Table of Contents
 -----------------
@@ -43,7 +43,7 @@ Introduction
 
 The Fabric:Splice C/C++ API, referred to as :dfn:`SPLICECAPI` in this document, is an abstraction layer to the `Fabric Core CAPI <http://documentation.fabric-engine.com/CreationPlatform/latest/HTML/CAPIProgrammingGuide/index.html>`_. The SPLICEAPI provides a simpler way to integrate Fabric Core based functionality into C/C++ hosts applications and wraps lots of the rudimentary facilities. The :dfn:`SPLICECAPI` also supports additional facilities, such as persistence, for example.
 
-Aside from this documentation API you can find a general descriptiong of how to integrate {{SPLICE_MODULE_NAME}} into a host application here: :ref:`SPLICEINTEGRATION`. This also includes recommendations for build settings and C defines.
+Aside from this documentation API you can find a general descriptiong of how to integrate Splice into a host application here: :ref:`SPLICEINTEGRATION`. This also includes recommendations for build settings and C defines.
 
 One API, Two Interfaces
 -----------------------
@@ -405,6 +405,8 @@ FabricSplice::KLParser
 =========================
 
 The KLParser class provides functionality to parse KL files. It also implements sub-classes for accessing contextual symbols for constants, structs, operators and functions. Using the :ref:`klparser` you can implement code completion tools, analytic tools for KL code, doxygen style documentation generation tools etc.
+
+.. note:: The KLParser will be deprecated after 1.13.0 and replaced by a proper AST representation.
 
 Example
 ---------------------------------

@@ -140,10 +140,11 @@ staticLibrary = staticEnv.Library(
 )
 installedStaticLibrary = staticEnv.Install(STAGE_DIR, staticLibrary)
 
-installedHeader = staticEnv.Install(STAGE_DIR, 'FabricSplice.h')
+spliceDistHeader = staticEnv.Install(STAGE_DIR, 'FabricSplice.h')
+Export('spliceDistHeader')
 installedLicense = staticEnv.Install(STAGE_DIR, 'license.txt')
 
-installedFiles = [installedStaticLibrary, installedHeader, installedLicense]
+installedFiles = [installedStaticLibrary, spliceDistHeader, installedLicense]
 
 spliceFlags = {
   'CPPPATH': [STAGE_DIR],
