@@ -41,6 +41,19 @@ else:
     'CPPDEFINES': ['NDEBUG'],
   }
 
+if FABRIC_BUILD_OS == "Darwin":
+  for flags in [spliceDebugFlags, spliceReleaseFlags]:
+    flags['CCFLAGS'] += [
+      '-fvisibility=hidden',
+      '-mmacosx-version-min=10.7',
+      '-stdlib=libstdc++',
+      '-fno-omit-frame-pointer',
+      ]      
+    flags['LINKFLAGS'] += [
+      '-mmacosx-version-min=10.7',
+      '-stdlib=libstdc++',
+      ]
+
 Export('spliceDebugFlags', 'spliceReleaseFlags')
 
 if FABRIC_BUILD_TYPE == 'Debug':
