@@ -75,7 +75,7 @@ sharedCapiFlags['LIBPATH'] += [os.path.join(FABRIC_CAPI_DIR, 'lib')]
 sharedCapiFlags['LIBS'] += ['FabricCore-'+FABRIC_CORE_VERSION]
 Export('sharedCapiFlags')
 
-apiVersion = FABRIC_SPLICE_VERSION.split('.')
+apiVersion = FABRIC_SPLICE_VERSION.split('-')[0].split('.')
 for i in range(1, len(apiVersion)):
   while len(apiVersion[i]) < 3:
     apiVersion[i] = '0'+apiVersion[i]
