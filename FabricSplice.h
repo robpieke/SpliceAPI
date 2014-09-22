@@ -1932,6 +1932,7 @@ FECS_DECL void FECS_DGPort_getOption(FECS_DGPortRef ref, const char * name, Fabr
 // FECS_DECL void FECS_DGPort_getAnimationChannels(FECS_DGPortRef ref, FabricCore::RTVal & result);
 // FECS_DECL void FECS_DGPort_setAnimationChannelValues(FECS_DGPortRef ref, unsigned int nbChannels, float * values);
 // FECS_DECL int FECS_DGPort_manipulate(FECS_DGPortRef ref, FabricCore::RTVal & manipulationContext);
+FECS_DECL void FECS_Free(void *ptr);
 
 #ifdef __cplusplus
 
@@ -2415,7 +2416,7 @@ namespace FabricSplice
         if(resultC)
         {
           result = resultC;
-          free(resultC);
+          FECS_Free(resultC);
         }
         return result;
       }
@@ -3711,7 +3712,7 @@ namespace FabricSplice
       if(ptr == NULL)
         return "";
       std::string result = ptr;
-      free(ptr);
+      FECS_Free(ptr);
       return result;
     }
 
@@ -4354,7 +4355,7 @@ namespace FabricSplice
       if(resultPtr == NULL)
         return "";
       std::string result = resultPtr;
-      free(resultPtr);
+      FECS_Free(resultPtr);
       return result;
     }
 
@@ -4447,7 +4448,7 @@ namespace FabricSplice
       if(ptr == NULL)
         return "";
       std::string data = ptr;
-      free(ptr);
+      FECS_Free(ptr);
       return data;
     }
 
@@ -4582,7 +4583,7 @@ namespace FabricSplice
       if(resultPtr == NULL)
         return defaultValue;
       std::string result = resultPtr;
-      free(resultPtr);
+      FECS_Free(resultPtr);
       return result;
     }
 

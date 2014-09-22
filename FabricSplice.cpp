@@ -2235,3 +2235,9 @@ void FECS_DGPort_getOption(FECS_DGPortRef ref, const char * name, FabricCore::Va
 //   return port->manipulate(manipulationContext);
 //   FECS_CATCH(0);
 // }
+
+// Needed to free memory allocated within the Splice DLL on Windows
+void FECS_Free(void *ptr)
+{
+  free(ptr);
+}
