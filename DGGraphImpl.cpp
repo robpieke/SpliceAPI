@@ -2304,7 +2304,7 @@ bool DGGraphImpl::memberPersistence(const std::string &name, const std::string &
   return persistence;
 }
 
-void DGGraphImpl::getDGPortInfo(FabricCore::Variant & portInfo)
+void DGGraphImpl::getDGPortInfo(FabricCore::Variant & portInfo, FabricCore::RTVal persistenceContextRT)
 {
   portInfo = FabricCore::Variant::CreateArray();
   for(DGPortIt it = mDGPorts.begin(); it != mDGPorts.end(); it++)
@@ -2328,6 +2328,43 @@ void DGGraphImpl::getDGPortInfo(FabricCore::Variant & portInfo)
     FabricCore::Variant options = it->second->getAllOptions();
     if(options.isDict())
       valueVar.setDictValue("options", options);
+
+    bool persistence = memberPersistence(it->second->getName(), dataType);
+    valueVar.setDictValue("persistence", FabricCore::Variant::CreateBoolean(persistence));
+
+    FabricCore::Variant defaultDataVar;
+    if(persistence)
+    {
+      FabricCore::Variant defaultDataVar = it->second->getVariant();
+      valueVar.setDictValue("default", defaultDataVar.getJSONEncoding());
+
+      if(persistenceContextRT.isValid())
+      {
+        FabricCore::RTVal rtVal = it->second->getRTVal();
+        if(rtVal.isValid())
+        {
+          if(rtVal.isObject())
+          {
+            if(!rtVal.isNullObject())
+            {
+              FabricCore::RTVal persistable = FabricSplice::constructObjectRTVal("Persistable", 1, &rtVal);
+              if(!persistable.isNullObject())
+              {
+                try
+                {
+                  FabricCore::RTVal stringRTVal = persistable.callMethod("String", "saveDataToString", 1, &persistenceContextRT);
+                  valueVar.setDictValue("persistenceData", FabricCore::Variant::CreateString(stringRTVal.getStringCString(), stringRTVal.getStringLength()));
+                }
+                catch(FabricCore::Exception e)
+                {
+                  LoggingImpl::reportError(e.getDesc_cstr());
+                }
+              }
+            }
+          }
+        }
+      }
+    }
 
     portInfo.arrayAppend(valueVar);
   }
@@ -2363,69 +2400,8 @@ FabricCore::Variant DGGraphImpl::getPersistenceDataDict(const PersistenceInfo * 
   {
     FabricCore::Variant dgNodeVar = FabricCore::Variant::CreateDict();
     dgNodeVar.setDictValue("name", FabricCore::Variant::CreateString(it->first.c_str()));
-    FabricCore::Variant memberListVar = FabricCore::Variant::CreateArray();
 
     FabricCore::DGNode node = it->second.node;
-    FabricCore::Variant members = node.getMembers_Variant();
-    for(FabricCore::Variant::DictIter keyIter(members); !keyIter.isDone(); keyIter.next())
-    {
-      FabricCore::Variant memberVar = FabricCore::Variant::CreateDict();
-      std::string key = keyIter.getKey()->getStringData();
-
-      // skip persistence of the evaluation context member
-      if(key == "context")
-        continue;
-
-      const FabricCore::Variant * keyDict = keyIter.getValue();
-      std::string type = keyDict->getDictValue("type")->getStringData();
-
-      memberVar.setDictValue("name", FabricCore::Variant::CreateString(key.c_str()));
-      memberVar.setDictValue("type", FabricCore::Variant::CreateString(type.c_str()));
-      FabricCore::Variant defaultDataVar;
-      
-
-      if(node.getSize() == 1)
-      {
-        if(memberPersistence(key, type)){
-          memberVar.setDictValue("persistence", FabricCore::Variant::CreateBoolean(true));
-          defaultDataVar = node.getMemberSliceData_Variant(key.c_str(), 0);
-        }
-
-        FabricCore::RTVal memberRT = node.getMemberSliceValue(key.c_str(), 0);
-        if(memberRT.isValid())
-        {
-          try
-          {
-            FabricCore::RTVal stringRTVal = memberRT.callMethod("String", "saveDataToString", 1, &persistenceContextRT);
-            memberVar.setDictValue("persistenceData", FabricCore::Variant::CreateString(stringRTVal.getStringCString(), stringRTVal.getStringLength()));
-          }
-          catch(FabricCore::Exception e)
-          {
-            // The only way to see if an RTVal supporta a given method is to try and invoke it. 
-          }
-        }
-      }
-      if(defaultDataVar.isNull())
-      {
-        if(StringUtilityImpl::endsWith(type, "[]"))
-          defaultDataVar = FabricCore::Variant::CreateArray();
-        else
-        {
-          FabricCore::RTVal defaultDataRT = node.getMemberSliceValue(key.c_str(), 0);
-          if(!defaultDataRT.isObject() && !defaultDataRT.isInterface())
-          {
-            defaultDataVar = node.getMemberDefaultData_Variant(key.c_str());
-            if(defaultDataVar.isNull())
-              defaultDataVar = node.getMemberSliceData_Variant(key.c_str(), 0);
-          }
-        }
-      }
-      if(!defaultDataVar.isNull())
-        memberVar.setDictValue("default", defaultDataVar.getJSONEncoding());
-
-      memberListVar.arrayAppend(memberVar);
-    }
-    dgNodeVar.setDictValue("members", memberListVar);
 
     dgNodeVar.setDictValue("dependencies", node.getDependencies_Variant());
 
@@ -2465,7 +2441,7 @@ FabricCore::Variant DGGraphImpl::getPersistenceDataDict(const PersistenceInfo * 
   dataVar.setDictValue("extensions", extensionListVar);
 
   FabricCore::Variant portInfo;
-  getDGPortInfo(portInfo);
+  getDGPortInfo(portInfo, persistenceContextRT);
   dataVar.setDictValue("ports", portInfo);
 
   return dataVar;
@@ -2569,110 +2545,10 @@ bool DGGraphImpl::setFromPersistenceDataDict(
     const FabricCore::Variant * nodeNameVar = nodeVar->getDictValue("name");
     if(!nodeNameVar)
       return LoggingImpl::reportError("JSON data is corrupt, 'node' element doesn't contain 'name' element.", errorOut);
-    const FabricCore::Variant * membersVar = nodeVar->getDictValue("members");
-    if(!membersVar)
-      return LoggingImpl::reportError("JSON data is corrupt, 'node' element doesn't contain 'members' element.", errorOut);
 
     std::string dgNodeName = nodeNameVar->getStringData();
     if(!constructDGNode(dgNodeName, errorOut))
       return false;
-
-    for(uint32_t i=0;i<membersVar->getArraySize();i++)
-    {
-      const FabricCore::Variant * memberVar = membersVar->getArrayElement(i);
-      const FabricCore::Variant * memberNameVar = memberVar->getDictValue("name");
-      if(!memberNameVar)
-        return LoggingImpl::reportError("JSON data is corrupt, 'member' element doesn't contain 'name' element.", errorOut);
-      const FabricCore::Variant * memberTypeVar = memberVar->getDictValue("type");
-      if(!memberTypeVar)
-        return LoggingImpl::reportError("JSON data is corrupt, 'member' element doesn't contain 'type' element.", errorOut);
-      const FabricCore::Variant * memberValueVar = memberVar->getDictValue("default");
-
-      FabricCore::Variant defaultValue;
-      if(memberValueVar)
-      {
-        std::string defaultValueStr = memberValueVar->getStringData();
-        if(defaultValueStr.length() > 0)
-          defaultValue = FabricCore::Variant::CreateFromJSON(defaultValueStr.c_str());
-      }
-
-      // skip persistence of the evaluation context member
-      std::string key = memberNameVar->getStringData();
-      if(key == "context")
-        continue;
-
-      // const FabricCore::Variant * currentValueVar = memberVar->getDictValue("value");
-      // if(currentValueVar)
-      // {
-      //   FabricCore::Variant value = FabricCore::Variant::CreateFromJSON(currentValueVar->getStringData());
-      //   defaultValue = value;
-      //   getDGNode(dgNodeName).setMemberSliceData_Variant(memberNameVar->getStringData(), 0, value);
-      // }
-
-      // try a second time without a default value
-      bool addMemberResult = addDGNodeMember(
-        key, 
-        memberTypeVar->getStringData(), 
-        defaultValue, 
-        dgNodeName,
-        "",
-        errorOut
-      );
-      if(!addMemberResult)
-      {
-        addMemberResult = addDGNodeMember(
-          memberNameVar->getStringData(), 
-          memberTypeVar->getStringData(), 
-          FabricCore::Variant(), 
-          dgNodeName,
-          "",
-          errorOut
-        );
-        if(addMemberResult)
-          LoggingImpl::clearError();
-      }
-      if(!addMemberResult)
-        return false;
-
-      const FabricCore::Variant * persistenceVar = memberVar->getDictValue("persistence");
-      if(persistenceVar)
-      {
-        bool persistence = persistenceVar->getBoolean();
-        setMemberPersistence(memberNameVar->getStringData(), persistence);
-      }
-      else
-      {
-        // backwards compatibility from 1.0.2-beta
-        const FabricCore::Variant * shouldPersistVar = memberVar->getDictValue("shouldPersist");
-        if(shouldPersistVar)
-        {
-          bool shouldPersist = shouldPersistVar->getBoolean();
-          setMemberPersistence(memberNameVar->getStringData(), shouldPersist);
-        }
-      }
-
-      const FabricCore::Variant * persistenceDataVar = memberVar->getDictValue("persistenceData");
-      if(persistenceDataVar && persistenceDataVar->isString()){
-        FabricCore::DGNode dgNode = getDGNode(dgNodeName);
-        if(dgNode.isValid()){
-          FabricCore::RTVal memberRTVal = dgNode.getMemberSliceValue(memberNameVar->getStringData(), 0);
-          try
-          {
-            if(memberRTVal.isValid() && !memberRTVal.isNullObject()){
-                FabricCore::RTVal args[2];
-                args[0] = persistenceContextRT;
-                args[1] = FabricSplice::constructStringRTVal(persistenceDataVar->getStringData());
-                FabricCore::RTVal stringRTVal = memberRTVal.callMethod("", "loadDataFromString", 2, &args[0]);
-              }
-          }
-          catch(FabricCore::Exception e)
-          {
-            // The only way to see if an RTVal supporta a given method is to try and invoke it. 
-          }
-        }
-      }
-
-    }    
   }
 
   for(uint32_t i=0;i<valuesVar->getArraySize();i++)
@@ -2681,6 +2557,9 @@ bool DGGraphImpl::setFromPersistenceDataDict(
     const FabricCore::Variant * valueNameVar = valueVar->getDictValue("name");
     if(!valueNameVar)
       return LoggingImpl::reportError("JSON data is corrupt, 'valueinterface' element doesn't contain 'name' element.", errorOut);
+    const FabricCore::Variant * valueTypeVar = valueVar->getDictValue("type");
+    if(!valueTypeVar)
+      return LoggingImpl::reportError("JSON data is corrupt, 'valueinterface' element doesn't contain 'type' element.", errorOut);
     const FabricCore::Variant * valueDGNodeVar = valueVar->getDictValue("node");
     if(!valueDGNodeVar)
       return LoggingImpl::reportError("JSON data is corrupt, 'valueinterface' element doesn't contain 'node' element.", errorOut);
@@ -2696,6 +2575,120 @@ bool DGGraphImpl::setFromPersistenceDataDict(
       if(autoInitObjectsVar->isBoolean())
         autoInitObjects = autoInitObjectsVar->getBoolean();
     const FabricCore::Variant * optionsVar = valueVar->getDictValue("options");
+
+    const FabricCore::Variant * defaultValueVar = valueVar->getDictValue("default");
+    const FabricCore::Variant * valuePersistenceVar = valueVar->getDictValue("persistence");
+    const FabricCore::Variant * valuePersistenceDataVar = valueVar->getDictValue("persistenceData");
+
+    // backwards compatibility for <= 1.12
+    if(!defaultValueVar && !valuePersistenceVar && !valuePersistenceDataVar)
+    {
+      std::string dgNodeName = valueDGNodeVar->getStringData();
+      for(uint32_t j=0;j<nodesVar->getArraySize();j++)
+      {
+        const FabricCore::Variant * nodeVar = nodesVar->getArrayElement(j);
+        const FabricCore::Variant * nodeNameVar = nodeVar->getDictValue("name");
+        if(dgNodeName == nodeNameVar->getStringData())
+        {
+          const FabricCore::Variant * membersVar = nodeVar->getDictValue("members");
+          if(membersVar)
+          {
+            for(uint32_t k=0;k<membersVar->getArraySize();k++)
+            {
+              const FabricCore::Variant * memberVar = membersVar->getArrayElement(k);
+              const FabricCore::Variant * memberNameVar = memberVar->getDictValue("name");
+              std::string memberName = memberNameVar->getStringData();
+              if(memberName == valueNameVar->getStringData())
+              {
+                defaultValueVar = memberVar->getDictValue("default");
+                valuePersistenceVar = memberVar->getDictValue("persistence");
+                valuePersistenceDataVar = memberVar->getDictValue("persistenceData");
+                break;
+              }
+            }
+          }
+          break;
+        }
+      }
+    }
+
+    FabricCore::Variant defaultValue;
+    if(defaultValueVar)
+    {
+      std::string defaultValueStr = defaultValueVar->getStringData();
+      if(defaultValueStr.length() > 0)
+        defaultValue = FabricCore::Variant::CreateFromJSON(defaultValueStr.c_str());
+    }
+
+    // try a second time without a default value
+    bool addMemberResult = addDGNodeMember(
+      valueMemberVar->getStringData(), 
+      valueTypeVar->getStringData(), 
+      defaultValue, 
+      valueDGNodeVar->getStringData(),
+      "",
+      errorOut
+    );
+    if(!addMemberResult)
+    {
+      addMemberResult = addDGNodeMember(
+        valueMemberVar->getStringData(), 
+        valueTypeVar->getStringData(), 
+        FabricCore::Variant(), 
+        valueDGNodeVar->getStringData(),
+        "",
+        errorOut
+      );
+      if(addMemberResult)
+        LoggingImpl::clearError();
+    }
+    if(!addMemberResult)
+      return false;
+
+    if(valuePersistenceVar)
+    {
+      bool persistence = valuePersistenceVar->getBoolean();
+      setMemberPersistence(valueMemberVar->getStringData(), persistence);
+    }
+    else
+    {
+      // backwards compatibility from 1.0.2-beta
+      const FabricCore::Variant * shouldPersistVar = valueVar->getDictValue("shouldPersist");
+      if(shouldPersistVar)
+      {
+        bool shouldPersist = shouldPersistVar->getBoolean();
+        setMemberPersistence(valueMemberVar->getStringData(), shouldPersist);
+      }
+    }
+
+    if(valuePersistenceVar && valuePersistenceDataVar)
+    {
+      if(valuePersistenceDataVar->isString())
+      {
+        FabricCore::DGNode dgNode = getDGNode(valueDGNodeVar->getStringData());
+        if(dgNode.isValid()){
+          FabricCore::RTVal memberRTVal = dgNode.getMemberSliceValue(valueMemberVar->getStringData(), 0);
+          if(memberRTVal.isValid() && !memberRTVal.isNullObject())
+          {
+            FabricCore::RTVal persistable = FabricSplice::constructObjectRTVal("Persistable", 1, &memberRTVal);
+            if(!persistable.isNullObject())
+            {
+              try
+              {
+                FabricCore::RTVal args[2];
+                args[0] = persistenceContextRT;
+                args[1] = FabricSplice::constructStringRTVal(valuePersistenceDataVar->getStringData());
+                persistable.callMethod("", "loadDataFromString", 2, &args[0]);
+              }
+              catch(FabricCore::Exception e)
+              {
+                LoggingImpl::reportError(e.getDesc_cstr());
+              }
+            }
+          }
+        }
+      }
+    }
 
     DGPortImpl::Mode mode = DGPortImpl::Mode_IO;
     std::string modeStr = valueModeVar->getStringData();
