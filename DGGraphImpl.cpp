@@ -223,6 +223,13 @@ void DGGraphImpl::clear(std::string * errorOut)
 
   mLoadedExtensions.clear();
 
+  // remove all operators
+  stringVector opsToRemove;
+  for(stringIt it = mDGOperatorNameMap.begin(); it != mDGOperatorNameMap.end(); it++)
+    opsToRemove.push_back(it->second);
+  for(size_t i=0;i<opsToRemove.size();i++)
+    removeKLOperator(opsToRemove[i]);
+
   // remove all ports
   stringVector portsToRemove;
   for(DGPortIt portIt=mDGPorts.begin();portIt!=mDGPorts.end();portIt++)
