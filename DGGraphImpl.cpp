@@ -121,6 +121,7 @@ const FabricCore::Client * DGGraphImpl::constructClient(bool guarded, FabricCore
     loadExtension("Manipulation");
     loadExtension("FileIO");
     loadExtension("Util");
+    loadExtension("SpliceInterfaces");
 
     // define the singletons scope
     sDrawingScope = FabricCore::RTVal::Create(*sClient, "InlineDrawingScope", 0, 0);
@@ -1551,7 +1552,18 @@ bool DGGraphImpl::removeKLOperator(const std::string & name, const std::string &
   {
     DGOperatorIt it = sDGOperators.find(opName);
     if(it != sDGOperators.end())
+    {
+      it->second.op.destroy();
       sDGOperators.erase(it);
+    }
+    DGOperatorSuffixIt suffixIt = sDGOperatorSuffix.find(opName);
+    if(suffixIt != sDGOperatorSuffix.end())
+    {
+      if(suffixIt->second == 1)
+      {
+        sDGOperatorSuffix.erase(suffixIt);
+      }
+    }
     LoggingImpl::log("DGGraph '"+getName()+"' removed KL Operator '"+name+"'.");
   }
 
