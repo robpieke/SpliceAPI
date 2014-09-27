@@ -180,6 +180,9 @@ The SPLICECAPI provides several global functions. These can be used to initializ
       // creates a RTVal given a KL object name and construction args
       FabricCore::RTVal constructObjectRTVal(const char * rt, uint32_t nbArgs, const FabricCore::RTVal * args);
 
+      // creates a KL interface RTVal given a KL object to cast
+      FabricCore::RTVal constructInterfaceRTVal(const char * rt, const FabricCore::RTVal & object);
+
       // creates a Boolean RTVal given its value
       FabricCore::RTVal constructBooleanRTVal(bool value);
 
@@ -1701,6 +1704,7 @@ FECS_DECL void FECS_ConstructRTVal(FabricCore::RTVal & result, const char * rt);
 FECS_DECL void FECS_ConstructRTValArgs(FabricCore::RTVal & result, const char * rt, uint32_t nbArgs, const FabricCore::RTVal * args);
 FECS_DECL void FECS_ConstructObjectRTVal(FabricCore::RTVal & result, const char * rt);
 FECS_DECL void FECS_ConstructObjectRTValArgs(FabricCore::RTVal & result, const char * rt, uint32_t nbArgs, const FabricCore::RTVal * args);
+FECS_DECL void FECS_ConstructInterfaceRTValArgs(FabricCore::RTVal & result, const char * rt, const FabricCore::RTVal & object);
 FECS_DECL void FECS_ConstructBooleanRTVal(FabricCore::RTVal & result, bool value);
 FECS_DECL void FECS_ConstructSInt8RTVal(FabricCore::RTVal & result, int8_t value);
 FECS_DECL void FECS_ConstructSInt16RTVal(FabricCore::RTVal & result, int16_t value);
@@ -2108,6 +2112,15 @@ namespace FabricSplice
   {
     FabricCore::RTVal result;
     FECS_ConstructObjectRTValArgs(result, rt, nbArgs, args);
+    Exception::MaybeThrow();
+    return result;
+  }
+
+  // creates a KL interface RTVal given a KL object to cast
+  inline FabricCore::RTVal constructInterfaceRTVal(const char * rt, const FabricCore::RTVal & object)
+  {
+    FabricCore::RTVal result;
+    FECS_ConstructInterfaceRTValArgs(result, rt, object);
     Exception::MaybeThrow();
     return result;
   }

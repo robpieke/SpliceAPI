@@ -2359,7 +2359,7 @@ void DGGraphImpl::getDGPortInfo(FabricCore::Variant & portInfo, FabricCore::RTVa
           {
             if(!rtVal.isNullObject())
             {
-              FabricCore::RTVal persistable = FabricSplice::constructObjectRTVal("Persistable", 1, &rtVal);
+              FabricCore::RTVal persistable = FabricSplice::constructInterfaceRTVal("Persistable", rtVal);
               if(!persistable.isNullObject())
               {
                 try
@@ -2369,7 +2369,8 @@ void DGGraphImpl::getDGPortInfo(FabricCore::Variant & portInfo, FabricCore::RTVa
                 }
                 catch(FabricCore::Exception e)
                 {
-                  LoggingImpl::reportError(e.getDesc_cstr());
+                  //ignore errors, assume we couldn't cast.
+                  //LoggingImpl::reportError(e.getDesc_cstr());
                 }
               }
             }
@@ -2682,7 +2683,7 @@ bool DGGraphImpl::setFromPersistenceDataDict(
           FabricCore::RTVal memberRTVal = dgNode.getMemberSliceValue(valueMemberVar->getStringData(), 0);
           if(memberRTVal.isValid() && !memberRTVal.isNullObject())
           {
-            FabricCore::RTVal persistable = FabricSplice::constructObjectRTVal("Persistable", 1, &memberRTVal);
+            FabricCore::RTVal persistable = FabricSplice::constructInterfaceRTVal("Persistable", memberRTVal);
             if(!persistable.isNullObject())
             {
               try

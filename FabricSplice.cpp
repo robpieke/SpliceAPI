@@ -190,6 +190,21 @@ void FECS_ConstructObjectRTValArgs(FabricCore::RTVal & result, const char * rt, 
   FECS_CATCH_VOID
 }
 
+void FECS_ConstructInterfaceRTValArgs(FabricCore::RTVal & result, const char * rt, const FabricCore::RTVal & object)
+{
+  FECS_TRY_CLEARERROR
+  const FabricCore::Client * client = DGGraphImpl::getClient();
+  if(client == NULL)
+    return;
+
+  const char * realExtName = FabricCore::GetRegisteredTypeExtName(*client, rt);
+  if(realExtName != NULL)
+    DGGraphImpl::loadExtension(realExtName);
+
+  result = FabricCore::RTVal::Construct(*client, rt, 1, &object);
+  FECS_CATCH_VOID
+}
+
 void FECS_ConstructBooleanRTVal(FabricCore::RTVal & result, bool value)
 {
   FECS_TRY_CLEARERROR
