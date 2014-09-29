@@ -553,7 +553,7 @@ bool DGGraphImpl::loadExtension(const std::string & extName, std::string * error
       FabricCore::KLSourceFile klSourceFile[1];
       klSourceFile[0].filenameCStr = fileName.c_str();
       klSourceFile[0].sourceCodeCStr = klCode.c_str();
-      RegisterKLExtension(*sClient, name.c_str(), "", 1, klSourceFile, false);
+      RegisterKLExtension(*sClient, name.c_str(), "", 1, klSourceFile, false, false);
     }
     catch(FabricCore::Exception e)
     {
