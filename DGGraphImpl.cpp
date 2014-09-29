@@ -2347,8 +2347,11 @@ void DGGraphImpl::getDGPortInfo(FabricCore::Variant & portInfo, FabricCore::RTVa
     FabricCore::Variant defaultDataVar;
     if(persistence)
     {
-      FabricCore::Variant defaultDataVar = it->second->getVariant();
-      valueVar.setDictValue("default", defaultDataVar.getJSONEncoding());
+      if(!it->second->isObject() && !it->second->isInterface())
+      {
+        FabricCore::Variant defaultDataVar = it->second->getVariant();
+        valueVar.setDictValue("default", defaultDataVar.getJSONEncoding());
+      }
 
       if(persistenceContextRT.isValid())
       {
