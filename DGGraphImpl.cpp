@@ -331,241 +331,182 @@ bool DGGraphImpl::loadExtension(const std::string & extName, std::string * error
   if(sClientRTs.find("RT" + name) != sClientRTs.end())
     return true;
 
-  std::string klCode;
-
   if(sClient == NULL)
     return LoggingImpl::reportError("No FabricCore Client created yet.", errorOut);
 
-  if(klCode.length() == 0)
+  // check if this is a type which is part of another extension
+  try
   {
-    // check if this is a type which is part of another extension
-    try
+    const char * realExtName = FabricCore::GetRegisteredTypeExtName(*sClient, name.c_str());
+    if(realExtName != NULL)
     {
-      const char * realExtName = FabricCore::GetRegisteredTypeExtName(*sClient, name.c_str());
-      if(realExtName != NULL)
+      if(realExtName != name && realExtName != extName)
       {
-        if(realExtName != name && realExtName != extName)
+        if(loadExtension(realExtName, errorOut))
         {
-          if(loadExtension(realExtName, errorOut))
-          {
-            sClientRTs.insert(stringPair(name, name));
-            return true;
-          }
+          sClientRTs.insert(stringPair(name, name));
+          return true;
         }
       }
     }
-    catch(FabricCore::Exception e)
-    {
-    }
+  }
+  catch(FabricCore::Exception e)
+  {
+  }
 
-    // finally load the extension from the core
-    try
-    {
-      sClient->loadExtension(name.c_str(), "", false);
-    }
-    catch(FabricCore::Exception e)
-    {
-      LoggingImpl::reportError(e.getDesc_cstr(), errorOut);
-      return false;
-    }
-
-    sClientRTs.insert(stringPair(name, name));
-
-    // if we have loaded this type, let's find the corresponding 
-    // code files and parse them
-    stringVector paths = sExtFolders;
-    char * pathChar = getenv("FABRIC_EXTS_PATH");
-    if(pathChar == NULL && paths.size() == 0)
-      return LoggingImpl::reportError("Cannot load extension '"+name+"', FABRIC_EXTS_PATH not specified..", errorOut);
-    else if(pathChar != NULL)
-    {
-      std::string path = pathChar;
-      if(path.length() == 0 && paths.size() == 0)
-        return LoggingImpl::reportError("Cannot load extension '"+name+"', FABRIC_EXTS_PATH not specified.", errorOut);
-      else if(path.length() > 0)
-      {
-  #ifdef _WIN32
-        stringVector newPaths = StringUtilityImpl::splitString(path, ';');
-  #else 
-        stringVector newPaths = StringUtilityImpl::splitString(path, ':');
-  #endif
-        paths.insert( paths.end(), newPaths.begin(), newPaths.end() );  
-      }
-    }
-
-    std::string fpmPath;
-    FILE * fpmFile = NULL;
-    for(size_t i=0;i<paths.size();i++)
-    {
-      if (paths[i].empty())
-        continue;
-
-  #ifdef _WIN32
-      paths[i] = StringUtilityImpl::replaceString(paths[i], '/', '\\');
-      if(!StringUtilityImpl::endsWith(paths[i], "\\"))
-        paths[i] += "\\";
-  #else
-      paths[i] = StringUtilityImpl::replaceString(paths[i], '\\', '/');
-      if(!StringUtilityImpl::endsWith(paths[i], "/"))
-        paths[i] += "/";
-  #endif
-      fpmPath = paths[i];
-      std::string fpmFilePath = paths[i] + name;
-      if(!StringUtilityImpl::endsWith(fpmFilePath,".fpm.json"))
-        fpmFilePath += ".fpm.json";
-
-      fpmFile = fopen(fpmFilePath.c_str(), "rb");
-      if(fpmFile)
-        break;
-
-      // add subfolders
-      try
-      {
-        if( boost::filesystem::exists(paths[i])) {
-          for ( boost::filesystem::directory_iterator end, dir(paths[i]); dir != end; ++dir ) {
-            std::string lastBit = dir->path().filename().string();
-            if(lastBit == "." || lastBit == "..")
-              continue;
-            if(!boost::filesystem::is_directory(dir->path()))
-              continue;
-            paths.push_back(dir->path().string());
-          }
-        }
-      }
-      catch ( std::exception e )
-      {
-        LoggingImpl::reportError(std::string("Unable to read Ext sub-folder: '") +
-            paths[i] + std::string("'"), errorOut);
-      }
-    }
-
-    std::vector<std::string> extKlFiles;
-    if(fpmFile != NULL)
-    {
-      fseek( fpmFile, 0, SEEK_END );
-      int fileSize = ftell( fpmFile );
-      rewind( fpmFile );
-
-      char * jsonBuffer = (char*) malloc(fileSize + 1);
-      jsonBuffer[fileSize] = '\0';
-
-      fread(jsonBuffer, fileSize, 1, fpmFile);
-      fclose(fpmFile);
-
-      std::string json = jsonBuffer;
-      free(jsonBuffer);
-
-      FabricCore::Variant jsonDict;
-      try
-      {
-        jsonDict = FabricCore::Variant::CreateFromJSON(json.c_str());
-      }
-      catch(FabricCore::Exception e)
-      {
-      }
-      if(!jsonDict.isNull())
-      {
-        const FabricCore::Variant * extCodeVar = jsonDict.getDictValue("code");
-        if(extCodeVar)
-        {
-          if(extCodeVar->isArray())
-          {
-            for(uint32_t i=0;i<extCodeVar->getArraySize();i++)
-            {
-              const FabricCore::Variant * extCodeElementVar = extCodeVar->getArrayElement(i);
-              if(!extCodeElementVar)
-                continue;
-              if(!extCodeElementVar->isString())
-                continue;
-              extKlFiles.push_back(extCodeElementVar->getStringData());
-            }
-          }
-          else if(extCodeVar->isString())
-            extKlFiles.push_back(extCodeVar->getStringData());
-        }
-      }
-    }
-
-    for(size_t i=0;i<extKlFiles.size();i++)
-    {
-      std::string extKlFilePath = fpmPath + extKlFiles[i];
-      if(!StringUtilityImpl::endsWith(extKlFilePath,".kl"))
-        extKlFilePath += ".kl";
-
-      FILE * extKlFile = fopen(extKlFilePath.c_str(), "rb");
-      if(extKlFile != NULL)
-      {
-        fseek( extKlFile, 0, SEEK_END );
-        int fileSize = ftell( extKlFile );
-        rewind( extKlFile );
-
-        char * klCodeBuffer = (char*) malloc(fileSize + 1);
-        klCodeBuffer[fileSize] = '\0';
-
-        fread(klCodeBuffer, fileSize, 1, extKlFile);
-        fclose(extKlFile);
-
-        std::string extKlFileCode = klCodeBuffer;
-        free(klCodeBuffer);
-
-        KLParserImpl::getParser(name.c_str(), extKlFiles[i].c_str(), extKlFileCode.c_str());
-      }
-    }
-    return true;
+  // finally load the extension from the core
+  try
+  {
+    sClient->loadExtension(name.c_str(), "", false);
+  }
+  catch(FabricCore::Exception e)
+  {
+    LoggingImpl::reportError(e.getDesc_cstr(), errorOut);
+    return false;
   }
 
   sClientRTs.insert(stringPair(name, name));
 
-  if(klCode.length() > 0)
+  // if we have loaded this type, let's find the corresponding 
+  // code files and parse them
+  stringVector paths = sExtFolders;
+  char * pathChar = getenv("FABRIC_EXTS_PATH");
+  if(pathChar == NULL && paths.size() == 0)
+    return LoggingImpl::reportError("Cannot load extension '"+name+"', FABRIC_EXTS_PATH not specified..", errorOut);
+  else if(pathChar != NULL)
   {
-    // load all dependencies
-    KLParserImplPtr parser = KLParserImpl::getParser(name.c_str(), name.c_str(), klCode.c_str());
-    for(unsigned int i=0;i<parser->getNbKLRequires();i++)
+    std::string path = pathChar;
+    if(path.length() == 0 && paths.size() == 0)
+      return LoggingImpl::reportError("Cannot load extension '"+name+"', FABRIC_EXTS_PATH not specified.", errorOut);
+    else if(path.length() > 0)
     {
-      std::string requiredType = parser->getKLRequire(i);
-      if(sClientRTs.find(requiredType) != sClientRTs.end())
-        continue;
-      std::string rtError;
-      loadExtension(requiredType, &rtError);
-
-      if(rtError.length() > 0)
-      {
-        try
-        {
-          sClient->loadExtension(name.c_str(), "", false);
-        }
-        catch(FabricCore::Exception e)
-        {
-          std::string message = "Require / Use statement '"+requiredType+"' in RT '"+name+"' cannot be resolved.";
-          if(rtError.length() > 0) message += "\n" + rtError;
-          return LoggingImpl::reportError(message, errorOut);
-        }
-      }
-      LoggingImpl::clearError();
+#ifdef _WIN32
+      stringVector newPaths = StringUtilityImpl::splitString(path, ';');
+#else 
+      stringVector newPaths = StringUtilityImpl::splitString(path, ':');
+#endif
+      paths.insert( paths.end(), newPaths.begin(), newPaths.end() );  
     }
+  }
 
-    std::string fileName = name + ".kl";
-    LoggingImpl::log("Loading type "+name+".");
+  std::string fpmPath;
+  FILE * fpmFile = NULL;
+  for(size_t i=0;i<paths.size();i++)
+  {
+    if (paths[i].empty())
+      continue;
 
-    // just register this as an extension
+#ifdef _WIN32
+    paths[i] = StringUtilityImpl::replaceString(paths[i], '/', '\\');
+    if(!StringUtilityImpl::endsWith(paths[i], "\\"))
+      paths[i] += "\\";
+#else
+    paths[i] = StringUtilityImpl::replaceString(paths[i], '\\', '/');
+    if(!StringUtilityImpl::endsWith(paths[i], "/"))
+      paths[i] += "/";
+#endif
+    fpmPath = paths[i];
+    std::string fpmFilePath = paths[i] + name;
+    if(!StringUtilityImpl::endsWith(fpmFilePath,".fpm.json"))
+      fpmFilePath += ".fpm.json";
+
+    fpmFile = fopen(fpmFilePath.c_str(), "rb");
+    if(fpmFile)
+      break;
+
+    // add subfolders
     try
     {
-      FabricCore::KLSourceFile klSourceFile[1];
-      klSourceFile[0].filenameCStr = fileName.c_str();
-      klSourceFile[0].sourceCodeCStr = klCode.c_str();
-      RegisterKLExtension(*sClient, name.c_str(), "", 1, klSourceFile, false, false);
+      if( boost::filesystem::exists(paths[i])) {
+        for ( boost::filesystem::directory_iterator end, dir(paths[i]); dir != end; ++dir ) {
+          std::string lastBit = dir->path().filename().string();
+          if(lastBit == "." || lastBit == "..")
+            continue;
+          if(!boost::filesystem::is_directory(dir->path()))
+            continue;
+          paths.push_back(dir->path().string());
+        }
+      }
+    }
+    catch ( std::exception e )
+    {
+      LoggingImpl::reportError(std::string("Unable to read Ext sub-folder: '") +
+          paths[i] + std::string("'"), errorOut);
+    }
+  }
+
+  std::vector<std::string> extKlFiles;
+  if(fpmFile != NULL)
+  {
+    fseek( fpmFile, 0, SEEK_END );
+    int fileSize = ftell( fpmFile );
+    rewind( fpmFile );
+
+    char * jsonBuffer = (char*) malloc(fileSize + 1);
+    jsonBuffer[fileSize] = '\0';
+
+    fread(jsonBuffer, fileSize, 1, fpmFile);
+    fclose(fpmFile);
+
+    std::string json = jsonBuffer;
+    free(jsonBuffer);
+
+    FabricCore::Variant jsonDict;
+    try
+    {
+      jsonDict = FabricCore::Variant::CreateFromJSON(json.c_str());
     }
     catch(FabricCore::Exception e)
     {
-      return LoggingImpl::reportError(e.getDesc_cstr(), errorOut);
     }
-
-    // ensure the type was loaded!
-    FabricCore::Variant currentTypes = GetRegisteredTypes_Variant(*sClient);
-    if(!currentTypes.getDictValue(name.c_str()))
-      return LoggingImpl::reportError("RT '"+name+"' could not be registered, bad KL code. Maybe the KL type is called differently than the file?", errorOut);
+    if(!jsonDict.isNull())
+    {
+      const FabricCore::Variant * extCodeVar = jsonDict.getDictValue("code");
+      if(extCodeVar)
+      {
+        if(extCodeVar->isArray())
+        {
+          for(uint32_t i=0;i<extCodeVar->getArraySize();i++)
+          {
+            const FabricCore::Variant * extCodeElementVar = extCodeVar->getArrayElement(i);
+            if(!extCodeElementVar)
+              continue;
+            if(!extCodeElementVar->isString())
+              continue;
+            extKlFiles.push_back(extCodeElementVar->getStringData());
+          }
+        }
+        else if(extCodeVar->isString())
+          extKlFiles.push_back(extCodeVar->getStringData());
+      }
+    }
   }
 
+  for(size_t i=0;i<extKlFiles.size();i++)
+  {
+    std::string extKlFilePath = fpmPath + extKlFiles[i];
+    if(!StringUtilityImpl::endsWith(extKlFilePath,".kl"))
+      extKlFilePath += ".kl";
+
+    FILE * extKlFile = fopen(extKlFilePath.c_str(), "rb");
+    if(extKlFile != NULL)
+    {
+      fseek( extKlFile, 0, SEEK_END );
+      int fileSize = ftell( extKlFile );
+      rewind( extKlFile );
+
+      char * klCodeBuffer = (char*) malloc(fileSize + 1);
+      klCodeBuffer[fileSize] = '\0';
+
+      fread(klCodeBuffer, fileSize, 1, extKlFile);
+      fclose(extKlFile);
+
+      std::string extKlFileCode = klCodeBuffer;
+      free(klCodeBuffer);
+
+      KLParserImpl::getParser(name.c_str(), extKlFiles[i].c_str(), extKlFileCode.c_str());
+    }
+  }
   return true;
 }
 
