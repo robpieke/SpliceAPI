@@ -4,7 +4,16 @@
 
 import os, sys, platform, copy
 
-Import('parentEnv', 'FABRIC_DIR', 'FABRIC_SPLICE_VERSION', 'STAGE_DIR', 'FABRIC_BUILD_TYPE', 'FABRIC_BUILD_OS', 'FABRIC_BUILD_ARCH', 'BOOST_DIR')
+Import(
+  'parentEnv',
+  'FABRIC_DIR',
+  'FABRIC_SPLICE_VERSION',
+  'STAGE_DIR',
+  'FABRIC_BUILD_TYPE',
+  'FABRIC_BUILD_OS',
+  'FABRIC_BUILD_ARCH',
+  'BOOST_DIR'
+  )
 
 # configuration flags
 if FABRIC_BUILD_OS == "Windows":
@@ -82,10 +91,15 @@ else:
   staticCapiFlags['LIBS'] += [File(os.path.join(FABRIC_DIR, 'lib', 'libFabricCore-'+FABRIC_CORE_VERSION+'_s.a'))]
 Export('staticCapiFlags')
 
+if FABRIC_BUILD_OS == 'Windows':
+  fabricCoreLibName = 'FabricCore-'+FABRIC_CORE_VERSION
+else:
+  fabricCoreLibName = 'FabricCore'
+
 sharedCapiFlags = copy.deepcopy(baseCapiFlags)
 sharedCapiFlags['CPPDEFINES'] += ['FEC_SHARED']
 sharedCapiFlags['LIBPATH'] += [os.path.join(FABRIC_DIR, 'lib')]
-sharedCapiFlags['LIBS'] += ['FabricCore-'+FABRIC_CORE_VERSION]
+sharedCapiFlags['LIBS'] += [fabricCoreLibName]
 Export('sharedCapiFlags')
 
 apiVersion = FABRIC_SPLICE_VERSION.split('-')[0].split('.')
@@ -151,13 +165,12 @@ staticLibrary = staticEnv.Library(
   staticLibName, 
   staticEnv.Glob('*.cpp')
 )
-installedStaticLibrary = staticEnv.Install(STAGE_DIR, staticLibrary)
+installedStaticLibrary = staticEnv.Install(STAGE_DIR.Dir('lib'), staticLibrary)
 
-spliceDistHeader = staticEnv.Install(STAGE_DIR, 'FabricSplice.h')
+spliceDistHeader = staticEnv.Install(STAGE_DIR.Dir('include'), 'FabricSplice.h')
 Export('spliceDistHeader')
-installedLicense = staticEnv.Install(STAGE_DIR, 'license.txt')
 
-installedFiles = [installedStaticLibrary, spliceDistHeader, installedLicense]
+installedFiles = [installedStaticLibrary, spliceDistHeader]
 
 spliceFlags = {
   'CPPPATH': [STAGE_DIR],
