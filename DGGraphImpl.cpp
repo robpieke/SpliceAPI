@@ -2303,18 +2303,22 @@ void DGGraphImpl::getDGPortInfo(FabricCore::Variant & portInfo, FabricCore::RTVa
           {
             if(!rtVal.isNullObject())
             {
-              FabricCore::RTVal persistable = FabricSplice::constructInterfaceRTVal("Persistable", rtVal);
-              if(!persistable.isNullObject())
+              FabricCore::RTVal objectRtVal = FabricSplice::constructRTVal("Object", 1, &rtVal);
+              if(objectRtVal.isValid())
               {
-                try
+                FabricCore::RTVal persistable = FabricSplice::constructInterfaceRTVal("Persistable", objectRtVal);
+                if(!persistable.isNullObject())
                 {
-                  FabricCore::RTVal stringRTVal = persistable.callMethod("String", "saveDataToString", 1, &persistenceContextRT);
-                  valueVar.setDictValue("persistenceData", FabricCore::Variant::CreateString(stringRTVal.getStringCString(), stringRTVal.getStringLength()));
-                }
-                catch(FabricCore::Exception e)
-                {
-                  //ignore errors, assume we couldn't cast.
-                  //LoggingImpl::reportError(e.getDesc_cstr());
+                  try
+                  {
+                    FabricCore::RTVal stringRTVal = persistable.callMethod("String", "saveDataToString", 1, &persistenceContextRT);
+                    valueVar.setDictValue("persistenceData", FabricCore::Variant::CreateString(stringRTVal.getStringCString(), stringRTVal.getStringLength()));
+                  }
+                  catch(FabricCore::Exception e)
+                  {
+                    //ignore errors, assume we couldn't cast.
+                    //LoggingImpl::reportError(e.getDesc_cstr());
+                  }
                 }
               }
             }
@@ -2627,19 +2631,23 @@ bool DGGraphImpl::setFromPersistenceDataDict(
           FabricCore::RTVal memberRTVal = dgNode.getMemberSliceValue(valueMemberVar->getStringData(), 0);
           if(memberRTVal.isValid() && !memberRTVal.isNullObject())
           {
-            FabricCore::RTVal persistable = FabricSplice::constructInterfaceRTVal("Persistable", memberRTVal);
-            if(!persistable.isNullObject())
+            FabricCore::RTVal objectRtVal = FabricSplice::constructRTVal("Object", 1, &memberRTVal);
+            if(objectRtVal.isValid())
             {
-              try
+              FabricCore::RTVal persistable = FabricSplice::constructInterfaceRTVal("Persistable", objectRtVal);
+              if(!persistable.isNullObject())
               {
-                FabricCore::RTVal args[2];
-                args[0] = persistenceContextRT;
-                args[1] = FabricSplice::constructStringRTVal(valuePersistenceDataVar->getStringData());
-                persistable.callMethod("", "loadDataFromString", 2, &args[0]);
-              }
-              catch(FabricCore::Exception e)
-              {
-                LoggingImpl::reportError(e.getDesc_cstr());
+                try
+                {
+                  FabricCore::RTVal args[2];
+                  args[0] = persistenceContextRT;
+                  args[1] = FabricSplice::constructStringRTVal(valuePersistenceDataVar->getStringData());
+                  persistable.callMethod("", "loadDataFromString", 2, &args[0]);
+                }
+                catch(FabricCore::Exception e)
+                {
+                  LoggingImpl::reportError(e.getDesc_cstr());
+                }
               }
             }
           }
