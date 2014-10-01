@@ -15,7 +15,7 @@ if 'clean' in COMMAND_LINE_TARGETS:
   Return()
 
 # check environment variables
-for var in ['FABRIC_CAPI_DIR', 'FABRIC_SPLICE_VERSION', 'FABRIC_BUILD_OS', 'FABRIC_BUILD_ARCH', 'FABRIC_BUILD_TYPE', 'BOOST_DIR']:
+for var in ['FABRIC_DIR', 'FABRIC_SPLICE_VERSION', 'FABRIC_BUILD_OS', 'FABRIC_BUILD_ARCH', 'FABRIC_BUILD_TYPE', 'BOOST_DIR']:
   if not os.environ.has_key(var):
     print 'The environment variable %s is not defined.' % var
     exit(0)
@@ -32,7 +32,7 @@ if not os.path.exists(spliceEnv.Dir('.stage').abspath):
   dirs = ['.'],
   exports = {
     'parentEnv': spliceEnv,
-    'FABRIC_CAPI_DIR': os.environ['FABRIC_CAPI_DIR'],
+    'FABRIC_DIR': os.environ['FABRIC_DIR'],
     'FABRIC_SPLICE_VERSION': os.environ['FABRIC_SPLICE_VERSION'],
     'FABRIC_BUILD_TYPE': os.environ['FABRIC_BUILD_TYPE'],
     'FABRIC_BUILD_OS': os.environ['FABRIC_BUILD_OS'],

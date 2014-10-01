@@ -4,7 +4,7 @@
 
 import os, sys, platform, copy
 
-Import('parentEnv', 'FABRIC_CAPI_DIR', 'FABRIC_SPLICE_VERSION', 'STAGE_DIR', 'FABRIC_BUILD_TYPE', 'FABRIC_BUILD_OS', 'FABRIC_BUILD_ARCH', 'BOOST_DIR')
+Import('parentEnv', 'FABRIC_DIR', 'FABRIC_SPLICE_VERSION', 'STAGE_DIR', 'FABRIC_BUILD_TYPE', 'FABRIC_BUILD_OS', 'FABRIC_BUILD_ARCH', 'BOOST_DIR')
 
 # configuration flags
 if FABRIC_BUILD_OS == "Windows":
@@ -62,7 +62,7 @@ else:
   parentEnv.MergeFlags(spliceReleaseFlags)
 
 baseCapiFlags = {
-  'CPPPATH': [os.path.join(FABRIC_CAPI_DIR, 'include')],
+  'CPPPATH': [os.path.join(FABRIC_DIR, 'include')],
   'CPPDEFINES': [
     'FEC_PROVIDE_STL_BINDINGS',
     '__STDC_LIMIT_MACROS',
@@ -77,14 +77,14 @@ FABRIC_CORE_VERSION = FABRIC_SPLICE_VERSION.rpartition('.')[0]
 staticCapiFlags = copy.deepcopy(baseCapiFlags)
 staticCapiFlags['CPPDEFINES'] += ['FEC_STATIC']
 if FABRIC_BUILD_OS == 'Windows':
-  staticCapiFlags['LIBS'] += [File(os.path.join(FABRIC_CAPI_DIR, 'lib', 'FabricCore-'+FABRIC_CORE_VERSION+'_s.lib'))]
+  staticCapiFlags['LIBS'] += [File(os.path.join(FABRIC_DIR, 'lib', 'FabricCore-'+FABRIC_CORE_VERSION+'_s.lib'))]
 else:
-  staticCapiFlags['LIBS'] += [File(os.path.join(FABRIC_CAPI_DIR, 'lib', 'libFabricCore-'+FABRIC_CORE_VERSION+'_s.a'))]
+  staticCapiFlags['LIBS'] += [File(os.path.join(FABRIC_DIR, 'lib', 'libFabricCore-'+FABRIC_CORE_VERSION+'_s.a'))]
 Export('staticCapiFlags')
 
 sharedCapiFlags = copy.deepcopy(baseCapiFlags)
 sharedCapiFlags['CPPDEFINES'] += ['FEC_SHARED']
-sharedCapiFlags['LIBPATH'] += [os.path.join(FABRIC_CAPI_DIR, 'lib')]
+sharedCapiFlags['LIBPATH'] += [os.path.join(FABRIC_DIR, 'lib')]
 sharedCapiFlags['LIBS'] += ['FabricCore-'+FABRIC_CORE_VERSION]
 Export('sharedCapiFlags')
 
