@@ -122,7 +122,7 @@ namespace FabricSpliceImpl
     */
 
     /// returns KL source code for the parameter list for all available ports
-    std::string generateKLOperatorParameterList();
+    std::string generateKLOperatorParameterList(bool useLineBreaks = false);
 
     /// returns dummy source code for a KL operator
     std::string generateKLOperatorSourceCode(const std::string & name, const std::string & additionalBody = "", const std::string & additionalFunctions = "", const std::string & executeParallelMember = "");
