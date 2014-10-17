@@ -1650,10 +1650,7 @@ Class Outline
 # error "Must define one of: FECS_STATIC, FECS_SHARED"
 #endif
 
-#ifdef __linux__
-# include <limits.h>
-#endif
-
+#include <limits.h>
 #include <stdlib.h>
 #include <FabricCore.h>
 
