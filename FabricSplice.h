@@ -3491,6 +3491,12 @@ namespace FabricSplice
     friend class DGGraph;
     friend class SceneManagement;
 
+	// Useful defines taken from 
+	// http://site.zorba.io/documentation/3.0/cxx/classzorba_1_1internal_1_1ztd_1_1explicit__bool.html
+	// to prevent converting this class to an int accidentally
+	typedef void (DGPort::*bool_type)() const;
+	void this_type_does_not_support_comparisons() const {}
+
   public:
     
     DGPort()
@@ -3524,11 +3530,13 @@ namespace FabricSplice
       return mRef != NULL;
     }
 
-    // bool conversion operator
-    operator bool() const
-    {
-      return isValid();
-    }
+	// bool conversion operator
+	// returning bool_type prevents the automatic
+	// conversion to int
+	operator bool_type() const
+	{
+		return isValid() ? &DGPort::this_type_does_not_support_comparisons : 0;
+	}
 
     // empties the content of the port
     void clear()
