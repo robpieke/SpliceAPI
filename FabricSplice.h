@@ -1604,6 +1604,7 @@ Class Outline
 
 #include <stdint.h>
 #include <stdio.h>
+#include "explicit_bool.h"
 
 #if defined(_MSC_VER) || defined(SWIGWIN)
 # if defined(__cplusplus)
@@ -2350,10 +2351,10 @@ namespace FabricSplice
       }
 
       // bool conversion operator
-      operator bool() const
-      {
-        return isValid();
-      }
+	  operator explicit_bool::type() const
+	  {
+	    return explicit_bool::get(isValid());
+	  }
 
       // returns the index of this symbol
       unsigned int index() const
@@ -2511,9 +2512,9 @@ namespace FabricSplice
       }
 
       // bool conversion operator
-      operator bool() const
+      operator explicit_bool::type() const
       {
-        return isValid();
+        return explicit_bool::get(isValid());
       }
 
       // returns the symbol of this KLConstant
@@ -2593,11 +2594,11 @@ namespace FabricSplice
         return mRef != NULL;
       }
 
-      // bool conversion operator
-      operator bool() const
-      {
-        return isValid();
-      }
+	  // bool conversion operator
+	  operator explicit_bool::type() const
+	  {
+		  return explicit_bool::get(isValid());
+	  }
 
       // returns the symbol of this KLVariable
       KLSymbol symbol() const
@@ -2660,11 +2661,11 @@ namespace FabricSplice
         return mRef != NULL;
       }
 
-      // bool conversion operator
-      operator bool() const
-      {
-        return isValid();
-      }
+	  // bool conversion operator
+	  operator explicit_bool::type() const
+	  {
+		  return explicit_bool::get(isValid());
+	  }
 
       // returns the symbol of this KLStruct
       KLSymbol symbol() const
@@ -2777,11 +2778,11 @@ namespace FabricSplice
         return mRef != NULL;
       }
 
-      // bool conversion operator
-      operator bool() const
-      {
-        return isValid();
-      }
+	  // bool conversion operator
+	  operator explicit_bool::type() const
+	  {
+		  return explicit_bool::get(isValid());
+	  }
 
       // returns number of arguments in this KLArgumentList
       unsigned int nbArgs() const
@@ -2852,11 +2853,11 @@ namespace FabricSplice
         return mRef != NULL;
       }
 
-      // bool conversion operator
-      operator bool() const
-      {
-        return isValid();
-      }
+	  // bool conversion operator
+	  operator explicit_bool::type() const
+	  {
+		  return explicit_bool::get(isValid());
+	  }
 
       // returns the symbol of this KLOperator
       KLSymbol symbol() const
@@ -2959,11 +2960,11 @@ namespace FabricSplice
         return mRef != NULL;
       }
 
-      // bool conversion operator
-      operator bool() const
-      {
-        return isValid();
-      }
+	  // bool conversion operator
+	  operator explicit_bool::type() const
+	  {
+		  return explicit_bool::get(isValid());
+	  }
 
       // returns the symbol of this KLFunction
       KLSymbol symbol() const
@@ -3066,11 +3067,11 @@ namespace FabricSplice
         return mRef != NULL;
       }
 
-      // bool conversion operator
-      operator bool() const
-      {
-        return isValid();
-      }
+	  // bool conversion operator
+	  operator explicit_bool::type() const
+	  {
+		  return explicit_bool::get(isValid());
+	  }
 
       // returns the symbol of this KLInterface
       KLSymbol symbol() const
@@ -3161,10 +3162,10 @@ namespace FabricSplice
     }
 
     // bool conversion operator
-    operator bool() const
-    {
-      return isValid();
-    }
+	operator explicit_bool::type() const
+	{
+	  return explicit_bool::get(isValid());
+	}
 
     // returns the owner of the parser
     const char * owner() const 
@@ -3524,11 +3525,13 @@ namespace FabricSplice
       return mRef != NULL;
     }
 
-    // bool conversion operator
-    operator bool() const
-    {
-      return isValid();
-    }
+	// bool conversion operator
+	// returning bool_type prevents the automatic
+	// conversion to int
+	operator explicit_bool::type() const
+	{
+		return explicit_bool::get(isValid());
+	}
 
     // empties the content of the port
     void clear()
@@ -4000,10 +4003,10 @@ namespace FabricSplice
     }
 
     // bool conversion operator
-    operator bool() const
-    {
-      return isValid();
-    }
+	operator explicit_bool::type() const
+	{
+	  return explicit_bool::get(isValid());
+	}
 
     // empties the content of the graph
     void clear()
