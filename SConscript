@@ -153,6 +153,7 @@ env = parentEnv.Clone()
 libNameBase = 'FabricSplice-'+FABRIC_SPLICE_VERSION
 
 staticEnv = env.Clone()
+staticEnv.VariantDir(staticEnv.Dir('static'), staticEnv.Dir('.').srcnode())
 staticEnv.Append(CPPDEFINES=['FEC_SHARED', 'FECS_STATIC', 'FECS_BUILDING'])
 staticEnv.MergeFlags(sharedCapiFlags)
 staticLibName = libNameBase+'_s'
@@ -163,14 +164,27 @@ else:
 
 staticLibrary = staticEnv.Library(
   staticLibName, 
-  staticEnv.Glob('*.cpp')
+  staticEnv.Glob('static/*.cpp')
 )
 installedStaticLibrary = staticEnv.Install(STAGE_DIR.Dir('lib'), staticLibrary)
+
+sharedEnv = env.Clone()
+sharedEnv.VariantDir(sharedEnv.Dir('shared'), sharedEnv.Dir('.').srcnode())
+sharedEnv.Append(CPPDEFINES=['FEC_SHARED', 'FECS_SHARED', 'FECS_BUILDING'])
+sharedEnv.MergeFlags(sharedCapiFlags)
+sharedLibName = libNameBase
+
+sharedLibrary = sharedEnv.SharedLibrary(
+  sharedLibName, 
+  sharedEnv.Glob('shared/*.cpp')
+)
+
+installedSharedLibrary = sharedEnv.Install(STAGE_DIR.Dir('lib'), sharedLibrary)
 
 spliceDistHeader = staticEnv.Install(STAGE_DIR.Dir('include'), 'FabricSplice.h')
 Export('spliceDistHeader')
 
-installedFiles = [installedStaticLibrary, spliceDistHeader]
+installedFiles = [installedStaticLibrary, installedSharedLibrary, spliceDistHeader]
 
 spliceFlags = {
   'CPPPATH': [STAGE_DIR],
