@@ -17,11 +17,7 @@ Import(
 
 # configuration flags
 if FABRIC_BUILD_OS == "Windows":
-  baseCPPDefines = [
-    '_SCL_SECURE_NO_WARNINGS=1',
-    '_ITERATOR_DEBUG_LEVEL=0',
-    '_WIN32_WINNT=0x0600',
-  ]
+  baseCPPDefines = []
   baseCPPFlags = [
     '/EHsc', 
     '/wd4624',
@@ -29,13 +25,13 @@ if FABRIC_BUILD_OS == "Windows":
   baseLinkFlags = ['chkstk.obj']
   spliceDebugFlags = {
     'CCFLAGS': baseCPPFlags + ['/Od', '/Z7', '/MTd', '/DEBUG'],
-    'CPPDEFINES': baseCPPDefines + ['_ITERATOR_DEBUG_LEVEL=0', '_DEBUG', 'DEBUG'],
-    'LINKFLAGS': baseLinkFlags + ['/DEBUG', '/NODEFAULTLIB:LIBCMT'],
+    'CPPDEFINES': baseCPPDefines + ['_DEBUG', 'DEBUG'],
+    'LINKFLAGS': baseLinkFlags + ['/DEBUG'],
   }
   spliceReleaseFlags = {
     'CCFLAGS': baseCPPFlags + ['/Ox', '/MT'],
     'CPPDEFINES': baseCPPDefines + ['NDEBUG'],
-    'LINKFLAGS': baseLinkFlags + ['/NDEBUG', '/NODEFAULTLIB:LIBCMTD'],
+    'LINKFLAGS': baseLinkFlags,
   }
   if FABRIC_BUILD_ARCH.endswith('64'):
     baseCPPDefines.append( 'WIN64' )
@@ -132,15 +128,15 @@ boostFlags = {
 if FABRIC_BUILD_OS == 'Windows':
   if FABRIC_BUILD_TYPE == 'Debug':
     boostFlags['LIBS'] = [
-      'libboost_thread-vc100-mt-sgd-1_55.lib',
-      'libboost_system-vc100-mt-sgd-1_55.lib',
-      'libboost_filesystem-vc100-mt-sgd-1_55.lib'
+      'libboost_thread-vc120-mt-sgd-1_55.lib',
+      'libboost_system-vc120-mt-sgd-1_55.lib',
+      'libboost_filesystem-vc120-mt-sgd-1_55.lib'
       ]
   else:
     boostFlags['LIBS'] = [
-      'libboost_thread-vc100-mt-s-1_55.lib',
-      'libboost_system-vc100-mt-s-1_55.lib',
-      'libboost_filesystem-vc100-mt-s-1_55.lib'
+      'libboost_thread-vc120-mt-s-1_55.lib',
+      'libboost_system-vc120-mt-s-1_55.lib',
+      'libboost_filesystem-vc120-mt-s-1_55.lib'
       ]
 else:
   boostFlags['LIBS'] = ['boost_thread','boost_system','boost_filesystem']
