@@ -1650,15 +1650,47 @@ Class Outline
 # error "Must define one of: FECS_STATIC, FECS_SHARED"
 #endif
 
-#ifdef __linux__
-# include <limits.h>
-#endif
-
+#include <limits.h>
 #include <stdlib.h>
 #include <FabricCore.h>
 
 // C typedefs
 //=====================================================
+
+//
+// This template class allows for defining explicit boolean
+// version operators without C++0x
+//
+// This code is taken (mostly) verbatim from 
+// http://en.wikibooks.org/wiki/More_C%2B%2B_Idioms/Safe_bool
+// modified so the actual conversion operators is no hidden on the base class 
+//
+// Usage is like so
+//
+//
+//  class YourClass : 
+//    public safe_bool <YourClass> // CRTP idiom
+//  {
+//  public:
+//    // Define boolean conversion
+//    operator explicit_bool::type() const {
+//      return explicit_bool::get(SomeLogicHere()); 
+//    }
+//  };
+//
+//   This will allow
+// if (yourClass)
+//   but not
+// int var = yourClass;
+class explicit_bool {
+  public:
+    typedef void (explicit_bool::*type)() const;
+    void this_type_does_not_support_comparisons() const {}
+  
+    static type get(bool condition) {
+        return condition ? &explicit_bool::this_type_does_not_support_comparisons : 0;
+    }
+};
 
 struct FECS_PersistenceInfo
 {
@@ -2353,10 +2385,10 @@ namespace FabricSplice
       }
 
       // bool conversion operator
-      operator bool() const
-      {
-        return isValid();
-      }
+	  operator explicit_bool::type() const
+	  {
+	    return explicit_bool::get(isValid());
+	  }
 
       // returns the index of this symbol
       unsigned int index() const
@@ -2514,9 +2546,9 @@ namespace FabricSplice
       }
 
       // bool conversion operator
-      operator bool() const
+      operator explicit_bool::type() const
       {
-        return isValid();
+        return explicit_bool::get(isValid());
       }
 
       // returns the symbol of this KLConstant
@@ -2596,11 +2628,11 @@ namespace FabricSplice
         return mRef != NULL;
       }
 
-      // bool conversion operator
-      operator bool() const
-      {
-        return isValid();
-      }
+	  // bool conversion operator
+	  operator explicit_bool::type() const
+	  {
+		  return explicit_bool::get(isValid());
+	  }
 
       // returns the symbol of this KLVariable
       KLSymbol symbol() const
@@ -2663,11 +2695,11 @@ namespace FabricSplice
         return mRef != NULL;
       }
 
-      // bool conversion operator
-      operator bool() const
-      {
-        return isValid();
-      }
+	  // bool conversion operator
+	  operator explicit_bool::type() const
+	  {
+		  return explicit_bool::get(isValid());
+	  }
 
       // returns the symbol of this KLStruct
       KLSymbol symbol() const
@@ -2780,11 +2812,11 @@ namespace FabricSplice
         return mRef != NULL;
       }
 
-      // bool conversion operator
-      operator bool() const
-      {
-        return isValid();
-      }
+	  // bool conversion operator
+	  operator explicit_bool::type() const
+	  {
+		  return explicit_bool::get(isValid());
+	  }
 
       // returns number of arguments in this KLArgumentList
       unsigned int nbArgs() const
@@ -2855,11 +2887,11 @@ namespace FabricSplice
         return mRef != NULL;
       }
 
-      // bool conversion operator
-      operator bool() const
-      {
-        return isValid();
-      }
+	  // bool conversion operator
+	  operator explicit_bool::type() const
+	  {
+		  return explicit_bool::get(isValid());
+	  }
 
       // returns the symbol of this KLOperator
       KLSymbol symbol() const
@@ -2962,11 +2994,11 @@ namespace FabricSplice
         return mRef != NULL;
       }
 
-      // bool conversion operator
-      operator bool() const
-      {
-        return isValid();
-      }
+	  // bool conversion operator
+	  operator explicit_bool::type() const
+	  {
+		  return explicit_bool::get(isValid());
+	  }
 
       // returns the symbol of this KLFunction
       KLSymbol symbol() const
@@ -3069,11 +3101,11 @@ namespace FabricSplice
         return mRef != NULL;
       }
 
-      // bool conversion operator
-      operator bool() const
-      {
-        return isValid();
-      }
+	  // bool conversion operator
+	  operator explicit_bool::type() const
+	  {
+		  return explicit_bool::get(isValid());
+	  }
 
       // returns the symbol of this KLInterface
       KLSymbol symbol() const
@@ -3164,10 +3196,10 @@ namespace FabricSplice
     }
 
     // bool conversion operator
-    operator bool() const
-    {
-      return isValid();
-    }
+	operator explicit_bool::type() const
+	{
+	  return explicit_bool::get(isValid());
+	}
 
     // returns the owner of the parser
     const char * owner() const 
@@ -3527,11 +3559,13 @@ namespace FabricSplice
       return mRef != NULL;
     }
 
-    // bool conversion operator
-    operator bool() const
-    {
-      return isValid();
-    }
+	// bool conversion operator
+	// returning bool_type prevents the automatic
+	// conversion to int
+	operator explicit_bool::type() const
+	{
+		return explicit_bool::get(isValid());
+	}
 
     // empties the content of the port
     void clear()
@@ -4003,10 +4037,10 @@ namespace FabricSplice
     }
 
     // bool conversion operator
-    operator bool() const
-    {
-      return isValid();
-    }
+	operator explicit_bool::type() const
+	{
+	  return explicit_bool::get(isValid());
+	}
 
     // empties the content of the graph
     void clear()

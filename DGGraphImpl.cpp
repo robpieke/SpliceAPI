@@ -1190,13 +1190,15 @@ bool DGGraphImpl::checkErrors(std::string * errorOut)
   return result;
 }
 
-std::string DGGraphImpl::generateKLOperatorParameterList()
+std::string DGGraphImpl::generateKLOperatorParameterList(bool useLineBreaks)
 {
   std::string result;
   for(DGPortIt it=mDGPorts.begin();it!=mDGPorts.end();it++)
   {
     if(result.length() > 0)
       result += ", ";
+    if(useLineBreaks)
+      result += "\n  ";
     if(it->second->getMode() == DGPortImpl::Mode_IN)
       result += "in ";
     else
@@ -1222,7 +1224,7 @@ std::string DGGraphImpl::generateKLOperatorSourceCode(
 ) {
   std::string code;
 
-  std::string params = generateKLOperatorParameterList();
+  std::string params = generateKLOperatorParameterList(true);
   std::string requireCode = "require Math;\n";
   std::string bodyCode;
   std::string executeParallelFunction;
@@ -1330,10 +1332,11 @@ std::string DGGraphImpl::generateKLOperatorSourceCode(
   code += requireCode + "\n";
   code += executeParallelFunction;
   code += additionalFunctions;
-  code += "operator "+name+"("+params+") {\n";
+  code += "operator "+name+"("+params+"\n) {\n";
   code += bodyCode;
   code += executeParallelBody;
   code += additionalBody;
+  code += "  \n";
   code += "}\n";
 
   return code;

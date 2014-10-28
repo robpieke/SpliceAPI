@@ -146,27 +146,109 @@ parentEnv.MergeFlags(boostFlags)
 
 env = parentEnv.Clone()
 
-libNameBase = 'FabricSplice-'+FABRIC_SPLICE_VERSION
+libNameBase = 'FabricSplice'
+majMinVer = os.path.splitext(FABRIC_SPLICE_VERSION)[0]
+majMinRevVer = FABRIC_SPLICE_VERSION
+
+if FABRIC_BUILD_OS == 'Windows':
+  libNameBase = '-'.join([libNameBase, majMinVer])
 
 staticEnv = env.Clone()
+staticEnv.VariantDir(staticEnv.Dir('static'), staticEnv.Dir('.').srcnode())
 staticEnv.Append(CPPDEFINES=['FEC_SHARED', 'FECS_STATIC', 'FECS_BUILDING'])
 staticEnv.MergeFlags(sharedCapiFlags)
-staticLibName = libNameBase+'_s'
+
+staticLibNameBase = libNameBase+'_s'
 if FABRIC_BUILD_OS == 'Windows':
-  staticLibName += '.lib'
-else:
-  staticLibName += '.a'
+  staticLibName = '.'.join([staticLibNameBase, 'lib'])
+if FABRIC_BUILD_OS == 'Linux':
+  staticLibName = '.'.join(['lib' + staticLibNameBase, 'a', majMinRevVer])
+if FABRIC_BUILD_OS == 'Darwin':
+  staticLibName = '.'.join(['lib' + staticLibNameBase, majMinRevVer, 'a'])
 
 staticLibrary = staticEnv.Library(
-  staticLibName, 
-  staticEnv.Glob('*.cpp')
+  staticEnv.File(staticLibName),
+  staticEnv.Glob('static/*.cpp')
 )
+
+if FABRIC_BUILD_OS == 'Linux' or FABRIC_BUILD_OS == 'Darwin':
+  env.AddPostAction(
+    staticLibrary,
+    [
+      [
+        'ln', '-snf',
+        '.'.join(['lib' + staticLibNameBase, 'a', majMinRevVer]),
+        STAGE_DIR.Dir('lib').File('.'.join(['lib' + staticLibNameBase, 'a', majMinVer])),
+        ],
+      [
+        'ln', '-snf',
+        '.'.join(['lib' + staticLibNameBase, 'a', majMinVer]),
+        STAGE_DIR.Dir('lib').File('.'.join(['lib' + staticLibNameBase, 'a'])),
+        ]
+      ]
+    )
+
 installedStaticLibrary = staticEnv.Install(STAGE_DIR.Dir('lib'), staticLibrary)
+
+sharedEnv = env.Clone()
+sharedEnv.VariantDir(sharedEnv.Dir('shared'), sharedEnv.Dir('.').srcnode())
+sharedEnv.Append(CPPDEFINES=['FEC_SHARED', 'FECS_SHARED', 'FECS_BUILDING'])
+sharedEnv.MergeFlags(sharedCapiFlags)
+
+if FABRIC_BUILD_OS == 'Windows':
+  sharedLibName = '.'.join([libNameBase, 'dll'])
+if FABRIC_BUILD_OS == 'Linux':
+  sharedLibName = '.'.join(['lib' + libNameBase, 'so', majMinRevVer])
+if FABRIC_BUILD_OS == 'Darwin':
+  sharedLibName = '.'.join(['lib' + libNameBase, majMinRevVer, 'dylib'])
+
+if FABRIC_BUILD_OS == 'Linux':
+  exportsFile = env.File('Linux.exports').srcnode()
+  sharedEnv.Append(SHLINKFLAGS = ['-Wl,--version-script='+str(exportsFile)])
+
+sharedLibrary = sharedEnv.SharedLibrary(
+  sharedEnv.File(sharedLibName),
+  sharedEnv.Glob('shared/*.cpp')
+)
+if FABRIC_BUILD_OS == 'Linux':
+  env.AddPostAction(
+    sharedLibrary,
+    [
+      [
+        'ln', '-snf',
+        '.'.join(['lib' + libNameBase, 'so', majMinRevVer]),
+        STAGE_DIR.Dir('lib').File('.'.join(['lib' + libNameBase, 'so', majMinVer])),
+        ],
+      [
+        'ln', '-snf',
+        '.'.join(['lib' + libNameBase, 'so', majMinVer]),
+        STAGE_DIR.Dir('lib').File('.'.join(['lib' + libNameBase, 'so'])),
+        ]
+      ]
+    )
+if FABRIC_BUILD_OS == 'Darwin':
+  env.AddPostAction(
+    sharedLibrary,
+    [
+      [
+        'ln', '-snf',
+        '.'.join(['lib' + libNameBase, majMinRevVer, 'dylib']),
+        STAGE_DIR.Dir('lib').File('.'.join(['lib' + libNameBase, majMinVer, 'dylib'])),
+        ],
+      [
+        'ln', '-snf',
+        '.'.join(['lib' + libNameBase, majMinVer, 'dylib']),
+        STAGE_DIR.Dir('lib').File('.'.join(['lib' + libNameBase, 'dylib'])),
+        ]
+      ]
+    )
+
+installedSharedLibrary = sharedEnv.Install(STAGE_DIR.Dir('lib'), sharedLibrary)
 
 spliceDistHeader = staticEnv.Install(STAGE_DIR.Dir('include'), 'FabricSplice.h')
 Export('spliceDistHeader')
 
-installedFiles = [installedStaticLibrary, spliceDistHeader]
+installedFiles = [installedStaticLibrary, installedSharedLibrary, spliceDistHeader]
 
 spliceFlags = {
   'CPPPATH': [STAGE_DIR],
