@@ -26,7 +26,7 @@ for var in ['FABRIC_DIR', 'FABRIC_SPLICE_VERSION', 'FABRIC_BUILD_OS', 'FABRIC_BU
 
 
 if not os.path.exists(spliceEnv.Dir('.stage').abspath):
-  os.makedirs(spliceEnv.Dir('.stage').abspath)
+  os.makedirs(spliceEnv.Dir('.stage').Dir('API').Dir('FabricSpliceAPI').Dir('lib').abspath)
 
 (spliceApiAlias, spliceApiFiles) = SConscript(
   dirs = ['.'],
