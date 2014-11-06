@@ -62,12 +62,20 @@ const FabricCore::Client * DGGraphImpl::constructClient(bool guarded, FabricCore
     options.traceOperators = 0;
     options.optimizationType = optType;
 
-    std::vector<const char *> extsPaths(sExtFolders.size());
-    for(size_t i=0;i<extsPaths.size();i++)
-      extsPaths[i] = sExtFolders[i].c_str();
+    if(sExtFolders.size() > 0)
+    {
+      std::vector<const char *> extsPaths(sExtFolders.size());
+      for(size_t i=0;i<extsPaths.size();i++)
+        extsPaths[i] = sExtFolders[i].c_str();
 
-    options.numExtPaths = extsPaths.size();
-    options.extPaths = &extsPaths[0];
+      options.numExtPaths = extsPaths.size();
+      options.extPaths = &extsPaths[0];
+    }
+    else
+    {
+      options.numExtPaths = 0;
+      options.extPaths = 0;
+    }
     options.numExtsToLoad = 0;
 
     sClient = new FabricCore::Client(&klReportFunc, 0, &options);
