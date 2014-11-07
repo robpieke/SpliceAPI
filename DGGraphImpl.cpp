@@ -10,6 +10,7 @@
 #include <stdio.h>
 
 #include <boost/filesystem.hpp>
+#include <boost/version.hpp>
 #include "FabricSplice.h"
 
 using namespace FabricSpliceImpl;
