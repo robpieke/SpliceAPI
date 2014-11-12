@@ -10,6 +10,7 @@
 #include <stdio.h>
 
 #include <boost/filesystem.hpp>
+#include <boost/version.hpp>
 #include "FabricSplice.h"
 
 using namespace FabricSpliceImpl;
@@ -427,7 +428,11 @@ bool DGGraphImpl::loadExtension(const std::string & extName, std::string * error
     {
       if( boost::filesystem::exists(paths[i])) {
         for ( boost::filesystem::directory_iterator end, dir(paths[i]); dir != end; ++dir ) {
+#if BOOST_VERSION == 105500
           std::string lastBit = dir->path().filename().string();
+#else
+          std::string lastBit = dir->path().filename();
+#endif
           if(lastBit == "." || lastBit == "..")
             continue;
           if(!boost::filesystem::is_directory(dir->path()))
@@ -1143,14 +1148,24 @@ bool DGGraphImpl::checkErrorVariant(const FabricCore::Variant * variant, std::st
     const FabricCore::Variant * filename = variant->getDictValue("filename");
     const FabricCore::Variant * level = variant->getDictValue("level");
     const FabricCore::Variant * desc = variant->getDictValue("desc");
+    const FabricCore::Variant * prefixes = variant->getDictValue("prefixes");
+    const FabricCore::Variant * suffixes = variant->getDictValue("suffixes");
 
-    return LoggingImpl::reportCompilerError(
-      line->getUInt32(),
-      column->getUInt32(),
-      filename->getStringData(),
-      level->getStringData(),
-      desc->getStringData()
+    if ( prefixes )
+      checkErrorVariant(prefixes, errorOut);
+
+    LoggingImpl::reportCompilerError(
+      line ? line->getUInt32() : 0,
+      column ? column->getUInt32() : 0,
+      filename ? filename->getStringData() : "",
+      level ? level->getStringData() : "",
+      desc ? desc->getStringData() : ""
     );
+
+    if ( suffixes )
+      checkErrorVariant(suffixes, errorOut);
+
+    return false;
   }
   return true;
 }
