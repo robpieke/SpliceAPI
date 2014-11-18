@@ -121,28 +121,28 @@ if not os.path.exists(BOOST_DIR):
   print "Refer to README.txt for more information."
   sys.exit(1)
 
-boostFlags = {
+spliceBoostFlags = {
   'CPPPATH': [BOOST_DIR],
   'LIBPATH': [os.path.join(BOOST_DIR, 'lib')],
 }
 if FABRIC_BUILD_OS == 'Windows':
   if FABRIC_BUILD_TYPE == 'Debug':
-    boostFlags['LIBS'] = [
+    spliceBoostFlags['LIBS'] = [
       'libboost_thread-vc120-mt-sgd-1_55.lib',
       'libboost_system-vc120-mt-sgd-1_55.lib',
       'libboost_filesystem-vc120-mt-sgd-1_55.lib'
       ]
   else:
-    boostFlags['LIBS'] = [
+    spliceBoostFlags['LIBS'] = [
       'libboost_thread-vc120-mt-s-1_55.lib',
       'libboost_system-vc120-mt-s-1_55.lib',
       'libboost_filesystem-vc120-mt-s-1_55.lib'
       ]
 else:
-  boostFlags['LIBS'] = ['boost_thread','boost_system','boost_filesystem']
-Export('boostFlags')
+  spliceBoostFlags['LIBS'] = ['boost_thread','boost_system','boost_filesystem']
+Export('spliceBoostFlags')
 
-parentEnv.MergeFlags(boostFlags)
+parentEnv.MergeFlags(spliceBoostFlags)
 
 env = parentEnv.Clone()
 
