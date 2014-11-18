@@ -26,6 +26,7 @@ DGGraphImpl::DGOperatorMap DGGraphImpl::sDGOperators;
 DGGraphImpl::DGOperatorSuffixMap DGGraphImpl::sDGOperatorSuffix;
 
 stringVector DGGraphImpl::sExtFolders;
+DGGraphImpl::GetOperatorSourceCodeFunc DGGraphImpl::sGetOperatorSourceCodeFunc = NULL;
 
 void klReportFunc(void *userdata, char const *reportData, uint32_t reportLength)
 {
@@ -63,12 +64,11 @@ const FabricCore::Client * DGGraphImpl::constructClient(bool guarded, FabricCore
     options.traceOperators = 0;
     options.optimizationType = optType;
 
+    std::vector<const char *> extsPaths(sExtFolders.size());
     if(sExtFolders.size() > 0)
     {
-      std::vector<const char *> extsPaths(sExtFolders.size());
       for(size_t i=0;i<extsPaths.size();i++)
         extsPaths[i] = sExtFolders[i].c_str();
-
       options.numExtPaths = extsPaths.size();
       options.extPaths = &extsPaths[0];
     }
@@ -166,6 +166,7 @@ DGGraphImpl::DGGraphImpl(
   setName(name);
   mDGNodeDefaultName = "DGNode";
   mRequiresEval = false;
+  mIsPersisting = false;
   mIsClearing = true;
   mUserPointer = NULL;
 
@@ -301,6 +302,11 @@ bool DGGraphImpl::addExtFolder(const std::string & folder, std::string * errorOu
   sExtFolders.push_back(folder);
 
   return true;
+}
+
+void DGGraphImpl::setDCCOperatorSourceCodeCallback(DGGraphImpl::GetOperatorSourceCodeFunc func)
+{
+  sGetOperatorSourceCodeFunc = func;
 }
 
 bool DGGraphImpl::isLicenseValid(std::string * errorOut)
@@ -647,7 +653,7 @@ char const * DGGraphImpl::getDGNodeName(unsigned int index)
 
 bool DGGraphImpl::evaluate(FabricCore::DGNode dgNode, std::string * errorOut)
 {
-  if(!mRequiresEval)
+  if(!mRequiresEval || mIsPersisting)
     return true;
 
   if(!dgNode.isValid())
@@ -1424,7 +1430,7 @@ bool DGGraphImpl::constructKLOperator(
     return LoggingImpl::reportError(e.getDesc_cstr(), errorOut);
   }
 
-  sDGOperators.insert(DGOperatorPair(opName, DGOperatorData(op)));
+  sDGOperators.insert(DGOperatorPair(opName, DGOperatorData(op, entryFunction, klCode)));
 
   FabricCore::DGBinding binding(op, 0, 0);
 
@@ -1551,9 +1557,7 @@ char const * DGGraphImpl::getKLOperatorEntry(const std::string & name, std::stri
     LoggingImpl::reportError("Operator '"+name+"' doesn't exist.", errorOut);
     return "";
   }
-
-  FabricCore::DGOperator op = opIt->second.op;
-  return op.getEntryPoint();
+  return opIt->second.entry.c_str();
 }
 
 bool DGGraphImpl::setKLOperatorEntry(const std::string & name, const std::string & entry, std::string * errorOut)
@@ -1567,6 +1571,7 @@ bool DGGraphImpl::setKLOperatorEntry(const std::string & name, const std::string
   }
 
   FabricCore::DGOperator op = opIt->second.op;
+  opIt->second.entry = entry;
   op.setEntryPoint(entry.c_str());
 
   LoggingImpl::log("KL Operator '"+name+"' entry updated.");
@@ -1682,9 +1687,7 @@ char const * DGGraphImpl::getKLOperatorSourceCodeByRealOpName(const std::string 
     LoggingImpl::reportError("Operator doesn't exist.", errorOut);
     return "";
   }
-
-  FabricCore::DGOperator op = opIt->second.op;
-  return op.getSourceCode();
+  return opIt->second.klCode.c_str();
 }
 
 bool DGGraphImpl::setKLOperatorSourceCode(
@@ -1704,6 +1707,10 @@ bool DGGraphImpl::setKLOperatorSourceCode(
     return LoggingImpl::reportError("Operator '"+name+"' doesn't exist.", errorOut);
 
   FabricCore::DGOperator op = opIt->second.op;
+
+  // always store the klCode in the map, even if it is invalid
+  opIt->second.entry = entryFunction;
+  opIt->second.klCode = sourceCode;
 
   // load all dependencies
   KLParserImplPtr parser = KLParserImpl::getParser(opName.c_str(), opName.c_str(), sourceCode.c_str());
@@ -2359,6 +2366,8 @@ void DGGraphImpl::getDGPortInfo(FabricCore::Variant & portInfo, FabricCore::RTVa
 
 FabricCore::Variant DGGraphImpl::getPersistenceDataDict(const PersistenceInfo * info)
 {
+  mIsPersisting = true;
+
   FabricCore::Variant dataVar = FabricCore::Variant::CreateDict();
   dataVar.setDictValue("version", FabricCore::Variant::CreateSInt32(SPLICE_API_VERSION).getJSONEncoding());
 
@@ -2408,7 +2417,20 @@ FabricCore::Variant DGGraphImpl::getPersistenceDataDict(const PersistenceInfo * 
       opVar.setDictValue("name", FabricCore::Variant::CreateString(opName.c_str()));
       opVar.setDictValue("entry", FabricCore::Variant::CreateString(op.getEntryPoint()));
       opVar.setDictValue("filename", FabricCore::Variant::CreateString(op.getFilename()));
-      opVar.setDictValue("kl", FabricCore::Variant::CreateString(op.getSourceCode()));
+
+      // check if we have operator source code in the DCC UI somewhere
+      std::string klCode;
+      if(sGetOperatorSourceCodeFunc)
+      {
+        const char * klCodeCStr = (*sGetOperatorSourceCodeFunc)(getName().c_str(), opName.c_str());
+        if(klCodeCStr)
+          klCode = klCodeCStr;
+      }
+      else
+      {
+        klCode = getKLOperatorSourceCode(opName);
+      }
+      opVar.setDictValue("kl", FabricCore::Variant::CreateString(klCode.c_str()));
       if(i < it->second.opPortMaps.size())
         opVar.setDictValue("portmap", it->second.opPortMaps[i]);
 
@@ -2430,6 +2452,8 @@ FabricCore::Variant DGGraphImpl::getPersistenceDataDict(const PersistenceInfo * 
   FabricCore::Variant portInfo;
   getDGPortInfo(portInfo, persistenceContextRT);
   dataVar.setDictValue("ports", portInfo);
+
+  mIsPersisting = false;
 
   return dataVar;
 }
