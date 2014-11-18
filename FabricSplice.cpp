@@ -122,13 +122,6 @@ bool FECS_addExtFolder(const char * folder)
   FECS_CATCH(false)
 }
 
-FECS_DECL void FECS_setDCCOperatorSourceCodeCallback(FECS_GetOperatorSourceCodeFunc func)
-{
-  FECS_TRY_CLEARERROR
-  return DGGraphImpl::setDCCOperatorSourceCodeCallback(func);
-  FECS_CATCH_VOID
-}
-
 bool FECS_isLicenseValid()
 {
   FECS_TRY_CLEARERROR
