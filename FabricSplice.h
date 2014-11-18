@@ -170,6 +170,14 @@ The SPLICECAPI provides several global functions. These can be used to initializ
       // by the list of folders defined through this function.
       bool addExtFolder(const char * folder)
 
+      // a DCC callback function to gather KL operator code from the UI
+      typedef const char *(*GetOperatorSourceCodeFunc)(const char * graphName, const char * opName);
+
+      // set a callback to allow the splice persistence framework to gather
+      // the last unsaved code for a given KL operator. this code might still
+      // sit in the UI somewhere but hasn't been pushed to the DGGraph.
+      void setDCCOperatorSourceCodeCallback(GetOperatorSourceCodeFunc func);
+
       // creates a RTVal just given a KL type name
       FabricCore::RTVal constructRTVal(const char * rt);
 
@@ -1713,6 +1721,7 @@ typedef void * FECS_KLParserFunctionRef;
 typedef void(*FECS_LoggingFunc)(const char * message, unsigned int messageLength);
 typedef void(*FECS_CompilerErrorFunc)(unsigned int row, unsigned int col, const char * file, const char * level, const char * desc);
 typedef void(*FECS_StatusFunc)(const char * topic, unsigned int topicLength, const char * message, unsigned int messageLength);
+typedef const char *(*FECS_GetOperatorSourceCodeFunc)(const char * graphName, const char * opName);
 
 enum FECS_DGPort_Mode
 {
@@ -1734,6 +1743,7 @@ FECS_DECL bool FECS_isLicenseValid();
 FECS_DECL bool FECS_setLicenseServer(const char * serverName);
 FECS_DECL bool FECS_setStandaloneLicense(const char * license);
 FECS_DECL bool FECS_addExtFolder(const char * folder);
+FECS_DECL void FECS_setDCCOperatorSourceCodeCallback(FECS_GetOperatorSourceCodeFunc func);
 FECS_DECL void FECS_ConstructRTVal(FabricCore::RTVal & result, const char * rt);
 FECS_DECL void FECS_ConstructRTValArgs(FabricCore::RTVal & result, const char * rt, uint32_t nbArgs, const FabricCore::RTVal * args);
 FECS_DECL void FECS_ConstructObjectRTVal(FabricCore::RTVal & result, const char * rt);
@@ -2112,6 +2122,18 @@ namespace FabricSplice
     bool result = FECS_addExtFolder(folder);
     Exception::MaybeThrow();
     return result;
+  }
+
+  // a DCC callback function to gather KL operator code from the UI
+  typedef FECS_GetOperatorSourceCodeFunc GetOperatorSourceCodeFunc;
+
+  // set a callback to allow the splice persistence framework to gather
+  // the last unsaved code for a given KL operator. this code might still
+  // sit in the UI somewhere but hasn't been pushed to the DGGraph.
+  inline void setDCCOperatorSourceCodeCallback(GetOperatorSourceCodeFunc func)
+  {
+    FECS_setDCCOperatorSourceCodeCallback(func);
+    Exception::MaybeThrow();
   }
 
   // creates a RTVal just given a KL type name
