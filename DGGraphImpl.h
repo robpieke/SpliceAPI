@@ -15,6 +15,8 @@ namespace FabricSpliceImpl
 
   public:
 
+    typedef const char *(*GetOperatorSourceCodeFunc)(const char * graphName, const char * opName);
+
     struct PersistenceInfo
     {
       FabricCore::Variant hostAppName;
@@ -53,6 +55,11 @@ namespace FabricSpliceImpl
 
     /// adds a search folder for extensions
     static bool addExtFolder(const std::string & folder, std::string * errorOut = NULL);
+
+    /// set a callback to allow the splice persistence framework to gather
+    /// the last unsaved code for a given KL operator. this code might still
+    /// sit in the UI somewhere but hasn't been pushed to the DGGraph.
+    static void setDCCOperatorSourceCodeCallback(GetOperatorSourceCodeFunc func);
 
     /* 
       Licensing
@@ -330,11 +337,15 @@ namespace FabricSpliceImpl
       FabricCore::DGOperator op;
       std::vector<DGOperatorParamInfo> params;
       size_t uses;
+      std::string entry;
+      std::string klCode;
 
-      DGOperatorData(FabricCore::DGOperator inOp)
+      DGOperatorData(FabricCore::DGOperator inOp, std::string inEntry, std::string inCode)
       {
         op = inOp;
         uses = 1;
+        entry = inEntry;
+        klCode = inCode;
       }
     };
 
@@ -365,6 +376,7 @@ namespace FabricSpliceImpl
     DGPortMap mDGPorts;
     std::string mDGNodeDefaultName;
     bool mRequiresEval;
+    bool mIsPersisting;
     bool mIsClearing;
     std::map<std::string, int> mMemberPersistenceOverrides;
     void * mUserPointer;
@@ -385,6 +397,7 @@ namespace FabricSpliceImpl
     static std::vector<DGGraphImpl*> sAllDGGraphs;
     static stringVector sRTFolders;
     static stringVector sExtFolders;
+    static GetOperatorSourceCodeFunc sGetOperatorSourceCodeFunc;
 
     // utilities
     bool memberPersistence(const std::string &name, const std::string &type);
