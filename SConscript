@@ -51,12 +51,12 @@ if FABRIC_BUILD_OS == "Darwin":
     flags['CCFLAGS'] += [
       '-fvisibility=hidden',
       '-mmacosx-version-min=10.7',
-      '-stdlib=libc++',
+      '-stdlib=libstdc++',
       '-fno-omit-frame-pointer',
       ]      
     flags['LINKFLAGS'] += [
       '-mmacosx-version-min=10.7',
-      '-stdlib=libc++',
+      '-stdlib=libstdc++',
       ]
 
 Export('spliceDebugFlags', 'spliceReleaseFlags')
