@@ -2426,7 +2426,7 @@ FabricCore::Variant DGGraphImpl::getPersistenceDataDict(const PersistenceInfo * 
         if(klCodeCStr)
           klCode = klCodeCStr;
       }
-      else
+      if(klCode.length() == 0)
       {
         klCode = getKLOperatorSourceCode(opName);
       }
