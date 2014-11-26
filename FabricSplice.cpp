@@ -1753,6 +1753,14 @@ bool FECS_DGGraph_clearEvaluate(FECS_DGGraphRef ref)
   FECS_CATCH(false);
 }
 
+bool FECS_DGGraph_usesEvalContext(FECS_DGGraphRef ref)
+{
+  FECS_TRY_CLEARERROR
+  GETSMARTPTR(DGGraphImplPtr, graph, false)
+  return graph->usesEvalContext();
+  FECS_CATCH(false);
+}
+
 bool FECS_DGGraph_requireEvaluate(FECS_DGGraphRef ref)
 {
   FECS_TRY_CLEARERROR
