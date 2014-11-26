@@ -3534,16 +3534,16 @@ namespace FabricSplice
       AutoTimer(const char * name)
       {
         mName = name;
-        Logging::startTimer(mName.c_str());
+        Logging::startTimer(mName);
       }
 
       ~AutoTimer()
       {
-        Logging::stopTimer(mName.c_str());
+        Logging::stopTimer(mName);
       }
 
     private:
-      std::string mName;
+      const char * mName;
     };        
   };
 
