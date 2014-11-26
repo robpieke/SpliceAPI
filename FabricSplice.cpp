@@ -80,14 +80,10 @@ const char * FECS_GetSpliceVersion()
 void FECS_constructClient(FabricCore::Client & client, int guarded, FabricCore::ClientOptimizationType optType)
 {
   FECS_TRY_CLEARERROR
-  bool useGuarded = true;
-  if(guarded < 0)
-  {
-    const char * hasEnv = getenv("FABRIC_SPLICE_UNGUARDED");
-    useGuarded = hasEnv == NULL;
-  }
-  else
-    useGuarded = guarded > 0;
+  bool useGuarded = guarded > 0;
+  const char *envUnguarded = getenv("FABRIC_SPLICE_UNGUARDED");
+  if ( envUnguarded )
+    useGuarded = atoi(envUnguarded) == 0;
   FabricCore::Client * currentClient = (FabricCore::Client*)DGGraphImpl::constructClient(useGuarded, optType);
   if(currentClient == NULL)
     return;
@@ -1421,14 +1417,10 @@ void FECS_Scripting_consumeVariantArgument(FabricCore::Variant & argsDict, const
 FECS_DGGraphRef FECS_DGGraph_construct(const char * name, int guarded, FabricCore::ClientOptimizationType optType)
 {
   FECS_TRY_CLEARERROR
-  bool useGuarded = true;
-  if(guarded < 0)
-  {
-    const char * hasEnv = getenv("FABRIC_SPLICE_UNGUARDED");
-    useGuarded = hasEnv == NULL;
-  }
-  else
-    useGuarded = guarded > 0;
+  bool useGuarded = guarded > 0;
+  const char *envUnguarded = getenv("FABRIC_SPLICE_UNGUARDED");
+  if ( envUnguarded )
+    useGuarded = atoi(envUnguarded) == 0;
   return new DGGraphImplPtr(DGGraphImpl::construct(name, useGuarded, optType));
   FECS_CATCH(NULL);
 }
@@ -1758,6 +1750,14 @@ bool FECS_DGGraph_clearEvaluate(FECS_DGGraphRef ref)
   FECS_TRY_CLEARERROR
   GETSMARTPTR(DGGraphImplPtr, graph, false)
   return graph->clearEvaluate();
+  FECS_CATCH(false);
+}
+
+bool FECS_DGGraph_usesEvalContext(FECS_DGGraphRef ref)
+{
+  FECS_TRY_CLEARERROR
+  GETSMARTPTR(DGGraphImplPtr, graph, false)
+  return graph->usesEvalContext();
   FECS_CATCH(false);
 }
 
