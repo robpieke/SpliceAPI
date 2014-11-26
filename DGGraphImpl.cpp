@@ -168,6 +168,7 @@ DGGraphImpl::DGGraphImpl(
   mRequiresEval = false;
   mIsPersisting = false;
   mIsClearing = true;
+  mUsesEvalContext = false;
   mUserPointer = NULL;
 
   try
@@ -696,6 +697,11 @@ bool DGGraphImpl::clearEvaluate(std::string * errorOut)
     return false;
   mRequiresEval = false;
   return true;
+}
+
+bool DGGraphImpl::usesEvalContext()
+{
+  return mUsesEvalContext;
 }
 
 FabricCore::RTVal DGGraphImpl::getEvalContext()
@@ -1966,6 +1972,10 @@ bool DGGraphImpl::validateKLOperator(const std::string & opName, bool logValidat
   // put this into has the right members
   for(size_t i=0;i<sAllDGGraphs.size();i++)
   {
+    // if there's only on operator, reset the mUsesEvalContext
+    if(sAllDGGraphs[i]->mBindings.size() == 1)
+      sAllDGGraphs[i]->mUsesEvalContext = false;
+
     for(size_t j=0;j<sAllDGGraphs[i]->mBindings.size();j++)
     {
       DGBindingData & data = sAllDGGraphs[i]->mBindings[j];
@@ -1991,6 +2001,7 @@ bool DGGraphImpl::validateKLOperator(const std::string & opName, bool logValidat
         if(opIt->second.params[k].name == "context" && opIt->second.params[k].dataType == "EvalContext" && !opIt->second.params[k].isArray && !opIt->second.params[k].isSliced)
         {
           data.portName[k] = opIt->second.params[k].name;
+          sAllDGGraphs[i]->mUsesEvalContext = true;
           continue;
         }
 

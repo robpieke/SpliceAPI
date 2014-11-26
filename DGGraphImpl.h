@@ -204,6 +204,9 @@ namespace FabricSpliceImpl
     /// clears the evaluation state
     bool clearEvaluate(std::string * errorOut = NULL);
 
+    /// returns if this graph is using the eval context
+    bool usesEvalContext();
+
     /// returns the graph's evaluation context object
     FabricCore::RTVal getEvalContext();
 
@@ -378,6 +381,7 @@ namespace FabricSpliceImpl
     bool mRequiresEval;
     bool mIsPersisting;
     bool mIsClearing;
+    bool mUsesEvalContext;
     std::map<std::string, int> mMemberPersistenceOverrides;
     void * mUserPointer;
     std::vector<DGBindingData> mBindings;

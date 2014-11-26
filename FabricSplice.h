@@ -1538,6 +1538,9 @@ Class Outline
         // requires the evaluate to take place
         bool requireEvaluate();
 
+        // returns if this graph is using the eval context
+        bool usesEvalContext();
+
         // returns the graph's evaluation context
         FabricCore::RTVal getEvalContext();
 
@@ -1922,6 +1925,7 @@ FECS_DECL char const * FECS_DGGraph_getGlobalKLOperatorName(unsigned int index);
 FECS_DECL bool FECS_DGGraph_checkErrors();
 FECS_DECL bool FECS_DGGraph_evaluate(FECS_DGGraphRef ref);
 FECS_DECL bool FECS_DGGraph_clearEvaluate(FECS_DGGraphRef ref);
+FECS_DECL bool FECS_DGGraph_usesEvalContext(FECS_DGGraphRef ref);
 FECS_DECL bool FECS_DGGraph_requireEvaluate(FECS_DGGraphRef ref);
 FECS_DECL void FECS_DGGraph_getEvalContext(FECS_DGPortRef ref, FabricCore::RTVal & result);
 FECS_DECL FECS_DGPortRef FECS_DGGraph_addDGPort(FECS_DGGraphRef ref, const char * name, const char * member, FECS_DGPort_Mode mode, const char * dgNodeName, bool autoInitObjects);
@@ -3530,16 +3534,16 @@ namespace FabricSplice
       AutoTimer(const char * name)
       {
         mName = name;
-        Logging::startTimer(mName.c_str());
+        Logging::startTimer(mName);
       }
 
       ~AutoTimer()
       {
-        Logging::stopTimer(mName.c_str());
+        Logging::stopTimer(mName);
       }
 
     private:
-      std::string mName;
+      const char * mName;
     };        
   };
 
@@ -4344,6 +4348,14 @@ namespace FabricSplice
     bool clearEvaluate()
     {
       bool result = FECS_DGGraph_clearEvaluate(mRef);
+      Exception::MaybeThrow();
+      return result;
+    }
+
+    // returns if this graph is using the eval context
+    bool usesEvalContext()
+    {
+      bool result = FECS_DGGraph_usesEvalContext(mRef);
       Exception::MaybeThrow();
       return result;
     }
