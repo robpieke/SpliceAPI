@@ -142,7 +142,7 @@ The SPLICECAPI provides several global functions. These can be used to initializ
       char const * GetSpliceVersion();
 
       // Constructs a FabricCore client
-      FabricCore::Client ConstructClient(int guarded = -1, FabricCore::ClientOptimizationType optType = FabricCore::ClientOptimizationType_Background);
+      FabricCore::Client ConstructClient(int guarded = 1, FabricCore::ClientOptimizationType optType = FabricCore::ClientOptimizationType_Background);
 
       // Destroys a FabricCore client
       bool DestroyClient(bool force = false);
@@ -1418,7 +1418,7 @@ Class Outline
         DGGraph();
 
         // constructor which creates a FabricCore::Client and initiates an internal FabricCore::DGNode
-        DGGraph(const char * name, int guarded = -1, FabricCore::ClientOptimizationType optType = FabricCore::ClientOptimizationType_Background);
+        DGGraph(const char * name, int guarded = 1, FabricCore::ClientOptimizationType optType = FabricCore::ClientOptimizationType_Background);
 
         // copy constructor
         DGGraph(DGGraph const & other);
@@ -2078,7 +2078,7 @@ namespace FabricSplice
     return result;
   }
 
-  inline FabricCore::Client ConstructClient(int guarded = -1, FabricCore::ClientOptimizationType optType = FabricCore::ClientOptimizationType_Background)
+  inline FabricCore::Client ConstructClient(int guarded = 1, FabricCore::ClientOptimizationType optType = FabricCore::ClientOptimizationType_Background)
   {
     FabricCore::Client result;
     FECS_constructClient(result, guarded, optType);
@@ -4030,7 +4030,7 @@ namespace FabricSplice
       mRef = NULL;
     }
 
-    DGGraph(const char * name, int guarded = -1, FabricCore::ClientOptimizationType optType = FabricCore::ClientOptimizationType_Background)
+    DGGraph(const char * name, int guarded = 1, FabricCore::ClientOptimizationType optType = FabricCore::ClientOptimizationType_Background)
     { 
       mRef = FECS_DGGraph_construct(name, guarded, optType); 
       Exception::MaybeThrow();
