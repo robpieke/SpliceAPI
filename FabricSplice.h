@@ -142,7 +142,7 @@ The SPLICECAPI provides several global functions. These can be used to initializ
       char const * GetSpliceVersion();
 
       // Constructs a FabricCore client
-      FabricCore::Client ConstructClient(int guarded = -1, FabricCore::ClientOptimizationType optType = FabricCore::ClientOptimizationType_Background);
+      FabricCore::Client ConstructClient(int guarded = 1, FabricCore::ClientOptimizationType optType = FabricCore::ClientOptimizationType_Background);
 
       // Destroys a FabricCore client
       bool DestroyClient(bool force = false);
@@ -1418,7 +1418,7 @@ Class Outline
         DGGraph();
 
         // constructor which creates a FabricCore::Client and initiates an internal FabricCore::DGNode
-        DGGraph(const char * name, int guarded = -1, FabricCore::ClientOptimizationType optType = FabricCore::ClientOptimizationType_Background);
+        DGGraph(const char * name, int guarded = 1, FabricCore::ClientOptimizationType optType = FabricCore::ClientOptimizationType_Background);
 
         // copy constructor
         DGGraph(DGGraph const & other);
@@ -2078,7 +2078,7 @@ namespace FabricSplice
     return result;
   }
 
-  inline FabricCore::Client ConstructClient(int guarded = -1, FabricCore::ClientOptimizationType optType = FabricCore::ClientOptimizationType_Background)
+  inline FabricCore::Client ConstructClient(int guarded = 1, FabricCore::ClientOptimizationType optType = FabricCore::ClientOptimizationType_Background)
   {
     FabricCore::Client result;
     FECS_constructClient(result, guarded, optType);
@@ -3910,7 +3910,7 @@ namespace FabricSplice
     {
       FabricCore::Variant option = getOption(name);
       if(!option.isBoolean())
-        return defaultValue;
+        return getIntegerOption(name, defaultValue) != 0;
       return option.getBoolean();
     }
 
@@ -3921,19 +3921,19 @@ namespace FabricSplice
       if(option.isSInt8())
         return (int)option.getSInt8();
       if(option.isSInt16())
-        return (int)option.getSInt8();
+        return (int)option.getSInt16();
       if(option.isSInt32())
-        return (int)option.getSInt8();
+        return (int)option.getSInt32();
       if(option.isSInt64())
-        return (int)option.getSInt8();
+        return (int)option.getSInt64();
       if(option.isUInt8())
         return (int)option.getUInt8();
       if(option.isUInt16())
-        return (int)option.getUInt8();
+        return (int)option.getUInt16();
       if(option.isUInt32())
-        return (int)option.getUInt8();
+        return (int)option.getUInt32();
       if(option.isUInt64())
-        return (int)option.getUInt8();
+        return (int)option.getUInt64();
       if(option.isFloat32())
         return (int)option.getFloat32();
       if(option.isFloat64())
@@ -3948,19 +3948,19 @@ namespace FabricSplice
       if(option.isSInt8())
         return (float)option.getSInt8();
       if(option.isSInt16())
-        return (float)option.getSInt8();
+        return (float)option.getSInt64();
       if(option.isSInt32())
-        return (float)option.getSInt8();
+        return (float)option.getSInt32();
       if(option.isSInt64())
-        return (float)option.getSInt8();
+        return (float)option.getSInt64();
       if(option.isUInt8())
         return (float)option.getUInt8();
       if(option.isUInt16())
-        return (float)option.getUInt8();
+        return (float)option.getUInt16();
       if(option.isUInt32())
-        return (float)option.getUInt8();
+        return (float)option.getUInt32();
       if(option.isUInt64())
-        return (float)option.getUInt8();
+        return (float)option.getUInt64();
       if(option.isFloat32())
         return (float)option.getFloat32();
       if(option.isFloat64())
@@ -4030,7 +4030,7 @@ namespace FabricSplice
       mRef = NULL;
     }
 
-    DGGraph(const char * name, int guarded = -1, FabricCore::ClientOptimizationType optType = FabricCore::ClientOptimizationType_Background)
+    DGGraph(const char * name, int guarded = 1, FabricCore::ClientOptimizationType optType = FabricCore::ClientOptimizationType_Background)
     { 
       mRef = FECS_DGGraph_construct(name, guarded, optType); 
       Exception::MaybeThrow();
