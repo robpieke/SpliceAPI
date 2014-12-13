@@ -1972,10 +1972,6 @@ bool DGGraphImpl::validateKLOperator(const std::string & opName, bool logValidat
   // put this into has the right members
   for(size_t i=0;i<sAllDGGraphs.size();i++)
   {
-    // if there's only on operator, reset the mUsesEvalContext
-    if(sAllDGGraphs[i]->mBindings.size() == 1)
-      sAllDGGraphs[i]->mUsesEvalContext = false;
-
     for(size_t j=0;j<sAllDGGraphs[i]->mBindings.size();j++)
     {
       DGBindingData & data = sAllDGGraphs[i]->mBindings[j];
@@ -1990,6 +1986,10 @@ bool DGGraphImpl::validateKLOperator(const std::string & opName, bool logValidat
       FabricCore::DGOperator op = binding.getOperator();
       if(op.getName() != opName)
         continue;
+
+      // if there's only on operator, reset the mUsesEvalContext
+      if(bindings.getCount() == 1)
+        sAllDGGraphs[i]->mUsesEvalContext = false;
 
       for(size_t k=0;k<opIt->second.params.size();k++)
       {
