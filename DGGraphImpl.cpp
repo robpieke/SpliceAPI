@@ -1166,18 +1166,19 @@ bool DGGraphImpl::checkErrorVariant(const FabricCore::Variant * variant, std::st
     if ( prefixes )
       checkErrorVariant(prefixes, errorOut);
 
+    char const *levelCStr = level ? level->getStringData() : "";
     LoggingImpl::reportCompilerError(
       line ? line->getUInt32() : 0,
       column ? column->getUInt32() : 0,
       filename ? filename->getStringData() : "",
-      level ? level->getStringData() : "",
+      levelCStr,
       desc ? desc->getStringData() : ""
     );
 
     if ( suffixes )
       checkErrorVariant(suffixes, errorOut);
 
-    return false;
+    return strcmp( levelCStr, "warning" ) == 0;
   }
   return true;
 }
