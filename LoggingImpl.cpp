@@ -19,6 +19,7 @@ LoggingFunc LoggingImpl::sErrorLogFunc = NULL;
 CompilerErrorFunc LoggingImpl::sCompilerErrorFunc = NULL;
 LoggingFunc LoggingImpl::sKLReportFunc = NULL;
 StatusFunc LoggingImpl::sKLStatusFunc = NULL;
+SlowOperationFunc LoggingImpl::sSlowOperationFunc = NULL;
 std::string LoggingImpl::mErrorLog;
 bool LoggingImpl::sTimersEnabled = false;
 std::map<std::string, LoggingImpl::TimeInfo> LoggingImpl::sTimers;
@@ -50,6 +51,11 @@ void LoggingImpl::setKLReportFunc(LoggingFunc func)
 void LoggingImpl::setKLStatusFunc(StatusFunc func)
 {
   sKLStatusFunc = func;
+}
+
+void LoggingImpl::setSlowOperationFunc(SlowOperationFunc func)
+{
+  sSlowOperationFunc = func;
 }
 
 void LoggingImpl::log(const std::string & message) 

@@ -1724,6 +1724,7 @@ typedef void * FECS_KLParserFunctionRef;
 typedef void(*FECS_LoggingFunc)(const char * message, unsigned int messageLength);
 typedef void(*FECS_CompilerErrorFunc)(unsigned int row, unsigned int col, const char * file, const char * level, const char * desc);
 typedef void(*FECS_StatusFunc)(const char * topic, unsigned int topicLength, const char * message, unsigned int messageLength);
+typedef void(*FECS_SlowOperationFunc)(const char *descCStr, unsigned int descLength );
 typedef const char *(*FECS_GetOperatorSourceCodeFunc)(const char * graphName, const char * opName);
 
 enum FECS_DGPort_Mode
@@ -1858,6 +1859,7 @@ FECS_DECL void FECS_Logging_setLogErrorFunc(FECS_LoggingFunc func);
 FECS_DECL void FECS_Logging_setCompilerErrorFunc(FECS_CompilerErrorFunc func);
 FECS_DECL void FECS_Logging_setKLReportFunc(FECS_LoggingFunc func);
 FECS_DECL void FECS_Logging_setKLStatusFunc(FECS_StatusFunc func);
+FECS_DECL void FECS_Logging_setSlowOperationFunc(FECS_SlowOperationFunc func);
 FECS_DECL bool FECS_Logging_hasError();
 FECS_DECL char const * FECS_Logging_getError();
 FECS_DECL void FECS_Logging_clearError();
@@ -2000,6 +2002,9 @@ namespace FabricSplice
 
   // a function to receive information from a KL status message
   typedef FECS_StatusFunc StatusFunc;
+
+  // a function to be called when slow operations start or finish
+  typedef FECS_SlowOperationFunc SlowOperationFunc;
 
   // a data set providing all manipulation data
   // typedef FECS_ManipulationData ManipulationData;
@@ -3477,6 +3482,12 @@ namespace FabricSplice
     static void setKLStatusFunc(StatusFunc func)
     {
       FECS_Logging_setKLStatusFunc(func); 
+    }
+
+    // sets the callback for KL queueStatusMessage statements
+    static void setSlowOperationFunc(SlowOperationFunc func)
+    {
+      FECS_Logging_setSlowOperationFunc(func); 
     }
 
     // enable timers

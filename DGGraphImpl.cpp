@@ -50,6 +50,16 @@ void klStatusFunc(void *userdata, char const *destData, uint32_t destLength,
     (*statusFunc)(topic.c_str(), topic.length(), message.c_str(), message.length());
 }
 
+void klSlowOperationFunc(
+  void *userdata,
+  char const *descCStr, uint32_t descLength
+  )
+{
+  SlowOperationFunc slowOperationFunc = LoggingImpl::getSlowOperationFunc();
+  if ( slowOperationFunc )
+    (*slowOperationFunc)( descCStr, descLength );
+}
+
 const FabricCore::Client * DGGraphImpl::constructClient(bool guarded, FabricCore::ClientOptimizationType optType)
 {
   if(sClient == NULL)
@@ -78,6 +88,7 @@ const FabricCore::Client * DGGraphImpl::constructClient(bool guarded, FabricCore
       options.extPaths = 0;
     }
     options.numExtsToLoad = 0;
+    options.slowOperationCallback = &klSlowOperationFunc;
 
     sClient = new FabricCore::Client(&klReportFunc, 0, &options);
 

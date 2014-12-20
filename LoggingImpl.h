@@ -17,6 +17,9 @@ namespace FabricSpliceImpl
   /// a function to receive information from a KL status message
   typedef void(*StatusFunc)(const char * topic, unsigned int topicLength, const char * message, unsigned int messageLength);
 
+  /// a function to receive notification when a slow operation starting or finishing
+  typedef void(*SlowOperationFunc)( const char *descCStr, uint32_t descLength );
+
   class LoggingImpl
   {
   public:
@@ -41,6 +44,12 @@ namespace FabricSpliceImpl
 
     /// gets the callback for KL queueStatusMessage statements
     static StatusFunc getKLStatusFunc() { return sKLStatusFunc; }
+
+    /// sets the callback for slow operations
+    static void setSlowOperationFunc( SlowOperationFunc func );
+
+    /// gets the callback for slow operations
+    static SlowOperationFunc getSlowOperationFunc() { return sSlowOperationFunc; }
 
     /// logs to the logFunc callback
     static void log(const std::string & message);
@@ -107,6 +116,7 @@ namespace FabricSpliceImpl
     static CompilerErrorFunc sCompilerErrorFunc;
     static LoggingFunc sKLReportFunc;
     static StatusFunc sKLStatusFunc;
+    static SlowOperationFunc sSlowOperationFunc;
     static std::string mErrorLog;
     struct TimeInfo {
       bool running;
