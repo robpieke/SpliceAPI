@@ -1068,6 +1068,13 @@ void FECS_Logging_setKLStatusFunc(FECS_StatusFunc func)
   FECS_CATCH_VOID
 }
 
+void FECS_Logging_setSlowOperationFunc(FECS_SlowOperationFunc func)
+{
+  FECS_TRY_CLEARERROR
+  LoggingImpl::setSlowOperationFunc(func); 
+  FECS_CATCH_VOID
+}
+
 bool FECS_Logging_hasError()
 {
   FECS_TRY
