@@ -1906,7 +1906,8 @@ void DGGraphImpl::setKLOperatorFilePath(const std::string & name, const std::str
     return;
   }
 
-  std::ifstream file(filePath.data());
+  std::string resolvedFilePath = resolveEnvironmentVariables(filePath);
+  std::ifstream file(resolvedFilePath.data());
 
   if(!file)
   {
@@ -2834,9 +2835,11 @@ bool DGGraphImpl::setFromPersistenceDataDict(
       if(operatorEntryVar)
         if(operatorEntryVar->isString())
           entry = operatorEntryVar->getStringData();
-      std::string filename = operatorFileNameVar->getStringData();
 
-      std::ifstream file(filename.c_str());
+      std::string filePath = operatorFileNameVar->getStringData();
+      std::string resolvedFilePath = resolveEnvironmentVariables(filePath);
+
+      std::ifstream file(resolvedFilePath.c_str());
       bool isFileBased = false;
       if(file)
       {
@@ -2869,14 +2872,14 @@ bool DGGraphImpl::setFromPersistenceDataDict(
       {
         std::string realOpName = getRealDGOperatorName(opName.c_str());
         if(mKLOperatorFileNames.find(realOpName) == mKLOperatorFileNames.end())
-          mKLOperatorFileNames.insert(stringPair(realOpName, filename));
+          mKLOperatorFileNames.insert(stringPair(realOpName, filePath));
         else
-          mKLOperatorFileNames.find(realOpName)->second = filename;
+          mKLOperatorFileNames.find(realOpName)->second = filePath;
       }
 
       DGOperatorIt opIt = sDGOperators.find(getRealDGOperatorName(opName.c_str()));
       if(opIt != sDGOperators.end())
-        opIt->second.op.setFilename(filename.c_str());
+        opIt->second.op.setFilename(filePath.c_str());
     }
   }
 
@@ -2973,4 +2976,35 @@ char const * DGGraphImpl::getPrettyDGOperatorName(const char * name) const
     return it->first.c_str();
   }
   return name;
+}
+
+std::string DGGraphImpl::resolveEnvironmentVariables(const std::string text)
+{
+  std::string output;
+  for(unsigned int i=0;i<text.length()-1;i++)
+  {
+    if(text[i] == '$' && text[i+1] == '{')
+    {
+      int closePos = text.find('}', i);
+      if(closePos != std::string::npos)
+      {
+        std::string envVarName = text.substr(i+2, closePos - i - 2);
+        const char * envVarValue = getenv(envVarName.c_str());
+        if(envVarValue != NULL)
+        {
+          output += envVarValue;
+          i = (unsigned int)closePos;
+          continue;
+        }
+      }
+    }
+    output += text[i];
+  }
+
+  if(text.length() > 0)
+  {
+    if(text[text.length()-1] != '}')
+      output += text[text.length()-1];
+  }
+  return output;
 }

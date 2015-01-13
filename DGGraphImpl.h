@@ -412,6 +412,7 @@ namespace FabricSpliceImpl
 
     // utilities
     bool memberPersistence(const std::string &name, const std::string &type);
+    std::string resolveEnvironmentVariables(const std::string text);
   };
 };
 
