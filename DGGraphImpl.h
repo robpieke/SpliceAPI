@@ -164,6 +164,12 @@ namespace FabricSpliceImpl
     /// saves the source code of a specific FabricCore::DGOperator to file
     void saveKLOperatorSourceCode(const std::string & name, const std::string & filePath, std::string * errorOut = NULL);
 
+    /// returns true if the KL operator is using a file
+    bool isKLOperatorFileBased(const std::string & name, std::string * errorOut = NULL);
+
+    /// gets the filepath of a specific FabricCore::DGOperator
+    char const * getKLOperatorFilePath(const std::string & name, std::string * errorOut = NULL);
+
     /// loads the content of the file and sets the code
     void setKLOperatorFilePath(const std::string & name, const std::string & filePath, const std::string & entry = "", std::string * errorOut = NULL);
 
@@ -388,6 +394,7 @@ namespace FabricSpliceImpl
     stringMap mLoadedExtensions;
     std::string mMetaData;
     FabricCore::RTVal mEvalContext;
+    stringMap mKLOperatorFileNames;
 
     // static members
     static DGOperatorSuffixMap sDGOperatorSuffix;

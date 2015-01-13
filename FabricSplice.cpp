@@ -1692,6 +1692,22 @@ void FECS_DGGraph_saveKLOperatorSourceCode(FECS_DGGraphRef ref, const char * nam
   FECS_CATCH_VOID
 }
 
+bool FECS_DGGraph_isKLOperatorFileBased(FECS_DGGraphRef ref, const char * name)
+{
+  FECS_TRY_CLEARERROR
+  GETSMARTPTR(DGGraphImplPtr, graph, 0)
+  return graph->isKLOperatorFileBased(name);
+  FECS_CATCH(false);
+}
+
+char const * FECS_DGGraph_getKLOperatorFilePath(FECS_DGGraphRef ref, const char * name)
+{
+  FECS_TRY_CLEARERROR
+  GETSMARTPTR(DGGraphImplPtr, graph, 0)
+  return graph->getKLOperatorFilePath(name);
+  FECS_CATCH("");
+}
+
 void FECS_DGGraph_setKLOperatorFilePath(FECS_DGGraphRef ref, const char * name, const char * filePath, const char * entry)
 {
   FECS_TRY_CLEARERROR

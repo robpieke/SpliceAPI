@@ -1874,6 +1874,28 @@ void DGGraphImpl::saveKLOperatorSourceCode(const std::string & name, const std::
   fclose(file);
 }
 
+bool DGGraphImpl::isKLOperatorFileBased(const std::string & name, std::string * errorOut)
+{
+  std::string opName = getRealDGOperatorName(name.c_str());
+  return mKLOperatorFileNames.find(opName) != mKLOperatorFileNames.end();  
+}
+
+char const * DGGraphImpl::getKLOperatorFilePath(const std::string & name, std::string * errorOut)
+{
+  std::string opName = getRealDGOperatorName(name.c_str());
+  if(mKLOperatorFileNames.find(opName) != mKLOperatorFileNames.end())
+    return mKLOperatorFileNames.find(opName)->second.c_str();
+
+  DGOperatorIt opIt = sDGOperators.find(opName);
+  if(opIt == sDGOperators.end())
+  {
+    LoggingImpl::reportError("Operator '"+name+"' doesn't exist.", errorOut);
+    return NULL;
+  }
+
+  return opIt->second.op.getFilename();
+}
+
 void DGGraphImpl::setKLOperatorFilePath(const std::string & name, const std::string & filePath, const std::string & entry, std::string * errorOut)
 {
   std::string opName = getRealDGOperatorName(name.c_str());
@@ -1891,6 +1913,11 @@ void DGGraphImpl::setKLOperatorFilePath(const std::string & name, const std::str
     LoggingImpl::reportError("Invalid filePath '"+filePath+"'", errorOut);
     return;
   }
+
+  if(mKLOperatorFileNames.find(opName) == mKLOperatorFileNames.end())
+    mKLOperatorFileNames.insert(stringPair(opName, filePath));
+  else
+    mKLOperatorFileNames.find(opName)->second = filePath;
   
   std::stringstream buffer;
   buffer << file.rdbuf();
@@ -2427,21 +2454,35 @@ FabricCore::Variant DGGraphImpl::getPersistenceDataDict(const PersistenceInfo * 
 
       opVar.setDictValue("name", FabricCore::Variant::CreateString(opName.c_str()));
       opVar.setDictValue("entry", FabricCore::Variant::CreateString(op.getEntryPoint()));
-      opVar.setDictValue("filename", FabricCore::Variant::CreateString(op.getFilename()));
 
-      // check if we have operator source code in the DCC UI somewhere
-      std::string klCode;
-      if(sGetOperatorSourceCodeFunc)
+      // either store the filename with the code, or just the filename.
+      // this should be based on a user decision, if the kl file is based 
+      // on an external file, or not.
+      stringIt fileNameIt = mKLOperatorFileNames.find(op.getName());
+      if(fileNameIt == mKLOperatorFileNames.end())
       {
-        const char * klCodeCStr = (*sGetOperatorSourceCodeFunc)(getName().c_str(), opName.c_str());
-        if(klCodeCStr)
-          klCode = klCodeCStr;
+        opVar.setDictValue("filename", FabricCore::Variant::CreateString(op.getFilename()));
+
+        // check if we have operator source code in the DCC UI somewhere
+        std::string klCode;
+        if(sGetOperatorSourceCodeFunc)
+        {
+          const char * klCodeCStr = (*sGetOperatorSourceCodeFunc)(getName().c_str(), opName.c_str());
+          if(klCodeCStr)
+            klCode = klCodeCStr;
+        }
+        if(klCode.length() == 0)
+        {
+          klCode = getKLOperatorSourceCode(opName);
+        }
+        opVar.setDictValue("kl", FabricCore::Variant::CreateString(klCode.c_str()));
       }
-      if(klCode.length() == 0)
+      else
       {
-        klCode = getKLOperatorSourceCode(opName);
+        opVar.setDictValue("filename", FabricCore::Variant::CreateString(fileNameIt->second.c_str()));
+        opVar.setDictValue("kl", FabricCore::Variant::CreateString(""));
       }
-      opVar.setDictValue("kl", FabricCore::Variant::CreateString(klCode.c_str()));
+
       if(i < it->second.opPortMaps.size())
         opVar.setDictValue("portmap", it->second.opPortMaps[i]);
 
@@ -2796,11 +2837,13 @@ bool DGGraphImpl::setFromPersistenceDataDict(
       std::string filename = operatorFileNameVar->getStringData();
 
       std::ifstream file(filename.c_str());
+      bool isFileBased = false;
       if(file)
       {
         std::stringstream buffer;
         buffer << file.rdbuf();
         klCode = buffer.str();
+        isFileBased = true;
       }
 
       std::string opName = operatorNameVar->getStringData();
@@ -2820,6 +2863,15 @@ bool DGGraphImpl::setFromPersistenceDataDict(
           LoggingImpl::clearError();
         }
         continue;
+      }
+
+      if(isFileBased)
+      {
+        std::string realOpName = getRealDGOperatorName(opName.c_str());
+        if(mKLOperatorFileNames.find(realOpName) == mKLOperatorFileNames.end())
+          mKLOperatorFileNames.insert(stringPair(realOpName, filename));
+        else
+          mKLOperatorFileNames.find(realOpName)->second = filename;
       }
 
       DGOperatorIt opIt = sDGOperators.find(getRealDGOperatorName(opName.c_str()));

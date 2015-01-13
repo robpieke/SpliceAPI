@@ -1511,6 +1511,12 @@ Class Outline
         // saves the source code of a specific FabricCore::DGOperator to file
         void saveKLOperatorSourceCode(const char * name, const char * filePath);
 
+        // returns true if the KL operator is using a file
+        bool isKLOperatorFileBased(const char * name);
+
+        // gets the filepath of a specific FabricCore::DGOperator
+        char const * getKLOperatorFilePath(const char * name);
+
         // loads the content of the file and sets the code
         void setKLOperatorFilePath(const char * name, const char * filePath, const char * entry = "");
 
@@ -1917,6 +1923,8 @@ FECS_DECL char const * FECS_DGGraph_getKLOperatorSourceCode(FECS_DGGraphRef ref,
 FECS_DECL bool FECS_DGGraph_setKLOperatorSourceCode(FECS_DGGraphRef ref, const char * name, const char * sourceCode, const char * entry);
 FECS_DECL void FECS_DGGraph_loadKLOperatorSourceCode(FECS_DGGraphRef ref, const char * name, const char * filePath);
 FECS_DECL void FECS_DGGraph_saveKLOperatorSourceCode(FECS_DGGraphRef ref, const char * name, const char * filePath);
+FECS_DECL bool FECS_DGGraph_isKLOperatorFileBased(FECS_DGGraphRef ref, const char * name);
+FECS_DECL char const * FECS_DGGraph_getKLOperatorFilePath(FECS_DGGraphRef ref, const char * name);
 FECS_DECL void FECS_DGGraph_setKLOperatorFilePath(FECS_DGGraphRef ref, const char * name, const char * filePath, const char * entry);
 FECS_DECL unsigned int FECS_DGGraph_getKLOperatorCount(FECS_DGGraphRef ref, const char * dgNodeName);
 FECS_DECL char const * FECS_DGGraph_getKLOperatorName(FECS_DGGraphRef ref, unsigned int index, const char * dgNodeName);
@@ -4283,6 +4291,22 @@ namespace FabricSplice
     {
       FECS_DGGraph_saveKLOperatorSourceCode(mRef, name, filePath);
       Exception::MaybeThrow();
+    }
+
+    // returns true if the KL operator is using a file
+    bool isKLOperatorFileBased(const char * name)
+    {
+      bool result = FECS_DGGraph_isKLOperatorFileBased(mRef, name);
+      Exception::MaybeThrow();
+      return result;
+    }
+
+    // gets the filepath of a specific FabricCore::DGOperator
+    char const * getKLOperatorFilePath(const char * name)
+    {
+      char const * result = FECS_DGGraph_getKLOperatorFilePath(mRef, name);
+      Exception::MaybeThrow();
+      return result;
     }
 
     // loads the content of the file and sets the code
