@@ -401,7 +401,7 @@ Class Outline
         class AutoTimer
         {
         public:
-          AutoTimer(const char * name);
+          AutoTimer(std::string const &name);
           ~AutoTimer();
 
         private:
@@ -3539,19 +3539,19 @@ namespace FabricSplice
     class AutoTimer
     {
     public:
-      AutoTimer(const char * name)
+      AutoTimer(std::string const &name)
       {
         mName = name;
-        Logging::startTimer(mName);
+        Logging::startTimer(mName.c_str());
       }
 
       ~AutoTimer()
       {
-        Logging::stopTimer(mName);
+        Logging::stopTimer(mName.c_str());
       }
 
     private:
-      const char * mName;
+      std::string mName;
     };        
   };
 
