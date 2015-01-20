@@ -1909,19 +1909,19 @@ char * FECS_DGGraph_getPersistenceDataJSON(FECS_DGGraphRef ref, const FECS_Persi
   FECS_CATCH(NULL)
 }
 
-bool FECS_DGGraph_setFromPersistenceDataDict(FECS_DGGraphRef ref, const FabricCore::Variant & dict, FECS_PersistenceInfo * info)
+bool FECS_DGGraph_setFromPersistenceDataDict(FECS_DGGraphRef ref, const FabricCore::Variant & dict, FECS_PersistenceInfo * info, const char * baseFilePath)
 {
   FECS_TRY_CLEARERROR
   GETSMARTPTR(DGGraphImplPtr, graph, false)
-  return graph->setFromPersistenceDataDict(graph, dict, (DGGraphImpl::PersistenceInfo *)info);
+  return graph->setFromPersistenceDataDict(graph, dict, (DGGraphImpl::PersistenceInfo *)info, baseFilePath);
   FECS_CATCH(false);
 }
 
-bool FECS_DGGraph_setFromPersistenceDataJSON(FECS_DGGraphRef ref, const char * json, FECS_PersistenceInfo * info)
+bool FECS_DGGraph_setFromPersistenceDataJSON(FECS_DGGraphRef ref, const char * json, FECS_PersistenceInfo * info, const char * baseFilePath)
 {
   FECS_TRY_CLEARERROR
   GETSMARTPTR(DGGraphImplPtr, graph, false)
-  return graph->setFromPersistenceDataJSON(graph, json, (DGGraphImpl::PersistenceInfo *)info);
+  return graph->setFromPersistenceDataJSON(graph, json, (DGGraphImpl::PersistenceInfo *)info, baseFilePath);
   FECS_CATCH(false);
 }
 

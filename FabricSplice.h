@@ -1602,10 +1602,10 @@ Class Outline
         std::string getPersistenceDataJSON(const PersistenceInfo * info = NULL);
 
         // constructs the node based on a variant dict
-        bool setFromPersistenceDataDict(const FabricCore::Variant & dict, PersistenceInfo * info = NULL);
+        bool setFromPersistenceDataDict(const FabricCore::Variant & dict, PersistenceInfo * info = NULL, const char * baseFilePath = NULL);
 
         // constructs the node based on a JSON string
-        bool setFromPersistenceDataJSON(const char * json, PersistenceInfo * info = NULL);
+        bool setFromPersistenceDataJSON(const char * json, PersistenceInfo * info = NULL, const char * baseFilePath = NULL);
 
         // persists the node description into a JSON file
         bool saveToFile(const char * filePath, const PersistenceInfo * info = NULL);
@@ -1948,8 +1948,8 @@ FECS_DECL bool FECS_DGGraph_setDGNodeDependency(FECS_DGGraphRef ref, const char 
 FECS_DECL bool FECS_DGGraph_removeDGNodeDependency(FECS_DGGraphRef ref, const char * dgNode, const char * dependency);
 FECS_DECL void FECS_DGGraph_getPersistenceDataDict(FECS_DGGraphRef ref, FabricCore::Variant & dict, const FECS_PersistenceInfo * info);
 FECS_DECL char * FECS_DGGraph_getPersistenceDataJSON(FECS_DGGraphRef ref, const FECS_PersistenceInfo * info);
-FECS_DECL bool FECS_DGGraph_setFromPersistenceDataDict(FECS_DGGraphRef ref, const FabricCore::Variant & dict, FECS_PersistenceInfo * info);
-FECS_DECL bool FECS_DGGraph_setFromPersistenceDataJSON(FECS_DGGraphRef ref, const char * json, FECS_PersistenceInfo * info);
+FECS_DECL bool FECS_DGGraph_setFromPersistenceDataDict(FECS_DGGraphRef ref, const FabricCore::Variant & dict, FECS_PersistenceInfo * info, const char * baseFilePath);
+FECS_DECL bool FECS_DGGraph_setFromPersistenceDataJSON(FECS_DGGraphRef ref, const char * json, FECS_PersistenceInfo * info, const char * baseFilePath);
 FECS_DECL bool FECS_DGGraph_saveToFile(FECS_DGGraphRef ref, const char * filePath, const FECS_PersistenceInfo * info);
 FECS_DECL bool FECS_DGGraph_loadFromFile(FECS_DGGraphRef ref, const char * filePath, FECS_PersistenceInfo * info);
 FECS_DECL void FECS_DGGraph_setMemberPersistence(FECS_DGGraphRef ref, const char * name, bool persistence);
@@ -4560,17 +4560,17 @@ namespace FabricSplice
     }
 
     // constructs the node based on a variant dict
-    bool setFromPersistenceDataDict(const FabricCore::Variant & dict, PersistenceInfo * info = NULL)
+    bool setFromPersistenceDataDict(const FabricCore::Variant & dict, PersistenceInfo * info = NULL, const char * baseFilePath = NULL)
     {
-      bool result = FECS_DGGraph_setFromPersistenceDataDict(mRef, dict, info);
+      bool result = FECS_DGGraph_setFromPersistenceDataDict(mRef, dict, info, baseFilePath);
       Exception::MaybeThrow();
       return result;
     }
 
     // constructs the node based on a JSON string
-    bool setFromPersistenceDataJSON(const std::string & json, PersistenceInfo * info = NULL)
+    bool setFromPersistenceDataJSON(const std::string & json, PersistenceInfo * info = NULL, const char * baseFilePath = NULL)
     {
-      bool result = FECS_DGGraph_setFromPersistenceDataJSON(mRef, json.c_str(), info);
+      bool result = FECS_DGGraph_setFromPersistenceDataJSON(mRef, json.c_str(), info, baseFilePath);
       Exception::MaybeThrow();
       return result;
     }
