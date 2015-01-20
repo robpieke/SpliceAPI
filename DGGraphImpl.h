@@ -164,6 +164,12 @@ namespace FabricSpliceImpl
     /// saves the source code of a specific FabricCore::DGOperator to file
     void saveKLOperatorSourceCode(const std::string & name, const std::string & filePath, std::string * errorOut = NULL);
 
+    /// returns true if the KL operator is using a file
+    bool isKLOperatorFileBased(const std::string & name, std::string * errorOut = NULL);
+
+    /// gets the filepath of a specific FabricCore::DGOperator
+    char const * getKLOperatorFilePath(const std::string & name, std::string * errorOut = NULL);
+
     /// loads the content of the file and sets the code
     void setKLOperatorFilePath(const std::string & name, const std::string & filePath, const std::string & entry = "", std::string * errorOut = NULL);
 
@@ -264,18 +270,21 @@ namespace FabricSpliceImpl
 
     /// constructs the node based on a variant dict
     /// you need to pass in thisGraph as a shared pointer to avoid cycles in reference counting.
-    bool setFromPersistenceDataDict(DGGraphImplPtr thisGraph, const FabricCore::Variant & dict, PersistenceInfo * info = NULL, std::string * errorOut = NULL);
+    bool setFromPersistenceDataDict(DGGraphImplPtr thisGraph, const FabricCore::Variant & dict, PersistenceInfo * info = NULL, const char * baseFilePath = NULL, std::string * errorOut = NULL);
 
     /// constructs the node based on a JSON string
     /// you need to pass in thisGraph as a shared pointer to avoid cycles in reference counting.
-    bool setFromPersistenceDataJSON(DGGraphImplPtr thisGraph, const std::string & json, PersistenceInfo * info = NULL, std::string * errorOut = NULL);
+    bool setFromPersistenceDataJSON(DGGraphImplPtr thisGraph, const std::string & json, PersistenceInfo * info = NULL, const char * baseFilePath = NULL, std::string * errorOut = NULL);
 
     /// persists the node description into a JSON file
     bool saveToFile(const std::string & filePath, const PersistenceInfo * info = NULL, std::string * errorOut = NULL);
 
     /// constructs the node based on a persisted JSON file
     /// you need to pass in thisGraph as a shared pointer to avoid cycles in reference counting.
-    bool loadFromFile(DGGraphImplPtr thisGraph, const std::string & filePath, PersistenceInfo * info = NULL, std::string * errorOut = NULL);
+    bool loadFromFile(DGGraphImplPtr thisGraph, const std::string & filePath, PersistenceInfo * info = NULL, bool asReferenced = false, std::string * errorOut = NULL);
+
+    /// returns true if this graph is referenced from a file
+    bool isReferenced();
 
     /// request an evaluation on idle
     bool requireEvaluate();
@@ -388,6 +397,9 @@ namespace FabricSpliceImpl
     stringMap mLoadedExtensions;
     std::string mMetaData;
     FabricCore::RTVal mEvalContext;
+    stringMap mKLOperatorFileNames;
+    bool mIsReferenced;
+    std::string mFilePath;
 
     // static members
     static DGOperatorSuffixMap sDGOperatorSuffix;
@@ -404,7 +416,9 @@ namespace FabricSpliceImpl
     static GetOperatorSourceCodeFunc sGetOperatorSourceCodeFunc;
 
     // utilities
-    bool memberPersistence(const std::string &name, const std::string &type);
+    bool memberPersistence(const std::string &name, const std::string &type, bool * requiresStorage = NULL);
+    static std::string resolveRelativePath(const std::string & baseFile, const std::string text);
+    static std::string resolveEnvironmentVariables(const std::string text);
   };
 };
 

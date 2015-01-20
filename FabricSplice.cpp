@@ -1699,6 +1699,22 @@ void FECS_DGGraph_saveKLOperatorSourceCode(FECS_DGGraphRef ref, const char * nam
   FECS_CATCH_VOID
 }
 
+bool FECS_DGGraph_isKLOperatorFileBased(FECS_DGGraphRef ref, const char * name)
+{
+  FECS_TRY_CLEARERROR
+  GETSMARTPTR(DGGraphImplPtr, graph, 0)
+  return graph->isKLOperatorFileBased(name);
+  FECS_CATCH(false);
+}
+
+char const * FECS_DGGraph_getKLOperatorFilePath(FECS_DGGraphRef ref, const char * name)
+{
+  FECS_TRY_CLEARERROR
+  GETSMARTPTR(DGGraphImplPtr, graph, 0)
+  return graph->getKLOperatorFilePath(name);
+  FECS_CATCH("");
+}
+
 void FECS_DGGraph_setKLOperatorFilePath(FECS_DGGraphRef ref, const char * name, const char * filePath, const char * entry)
 {
   FECS_TRY_CLEARERROR
@@ -1900,19 +1916,19 @@ char * FECS_DGGraph_getPersistenceDataJSON(FECS_DGGraphRef ref, const FECS_Persi
   FECS_CATCH(NULL)
 }
 
-bool FECS_DGGraph_setFromPersistenceDataDict(FECS_DGGraphRef ref, const FabricCore::Variant & dict, FECS_PersistenceInfo * info)
+bool FECS_DGGraph_setFromPersistenceDataDict(FECS_DGGraphRef ref, const FabricCore::Variant & dict, FECS_PersistenceInfo * info, const char * baseFilePath)
 {
   FECS_TRY_CLEARERROR
   GETSMARTPTR(DGGraphImplPtr, graph, false)
-  return graph->setFromPersistenceDataDict(graph, dict, (DGGraphImpl::PersistenceInfo *)info);
+  return graph->setFromPersistenceDataDict(graph, dict, (DGGraphImpl::PersistenceInfo *)info, baseFilePath);
   FECS_CATCH(false);
 }
 
-bool FECS_DGGraph_setFromPersistenceDataJSON(FECS_DGGraphRef ref, const char * json, FECS_PersistenceInfo * info)
+bool FECS_DGGraph_setFromPersistenceDataJSON(FECS_DGGraphRef ref, const char * json, FECS_PersistenceInfo * info, const char * baseFilePath)
 {
   FECS_TRY_CLEARERROR
   GETSMARTPTR(DGGraphImplPtr, graph, false)
-  return graph->setFromPersistenceDataJSON(graph, json, (DGGraphImpl::PersistenceInfo *)info);
+  return graph->setFromPersistenceDataJSON(graph, json, (DGGraphImpl::PersistenceInfo *)info, baseFilePath);
   FECS_CATCH(false);
 }
 
@@ -1924,11 +1940,19 @@ bool FECS_DGGraph_saveToFile(FECS_DGGraphRef ref, const char * filePath, const F
   FECS_CATCH(false);
 }
 
-bool FECS_DGGraph_loadFromFile(FECS_DGGraphRef ref, const char * filePath, FECS_PersistenceInfo * info)
+bool FECS_DGGraph_loadFromFile(FECS_DGGraphRef ref, const char * filePath, FECS_PersistenceInfo * info, bool asReferenced)
 {
   FECS_TRY_CLEARERROR
   GETSMARTPTR(DGGraphImplPtr, graph, false)
-  return graph->loadFromFile(graph, filePath, (DGGraphImpl::PersistenceInfo *)info);
+  return graph->loadFromFile(graph, filePath, (DGGraphImpl::PersistenceInfo *)info, asReferenced);
+  FECS_CATCH(false);
+}
+
+FECS_DECL bool FECS_DGGraph_isReferenced(FECS_DGGraphRef ref)
+{
+  FECS_TRY_CLEARERROR
+  GETSMARTPTR(DGGraphImplPtr, graph, false)
+  return graph->isReferenced();
   FECS_CATCH(false);
 }
 

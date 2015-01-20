@@ -82,16 +82,16 @@ namespace FabricSpliceImpl
     static void disableTimers();
 
     /// reset a timer
-    static void resetTimer(const std::string & name);
+    static void resetTimer(const char * name);
 
     /// start a timer
-    static void startTimer(const std::string & name);
+    static void startTimer(const char * name);
 
     /// stop a timer and accumulate the time
-    static void stopTimer(const std::string & name);
+    static void stopTimer(const char * name);
 
     /// log a given timer
-    static void logTimer(const std::string & name);
+    static void logTimer(const char * name);
 
     /// return the number of existing timers
     static unsigned int getNbTimers();
@@ -103,11 +103,11 @@ namespace FabricSpliceImpl
     class AutoTimerImpl
     {
     public:
-      AutoTimerImpl(std::string name);
+      AutoTimerImpl(const char * name);
       ~AutoTimerImpl();
 
     private:
-      std::string mName;
+      const char * mName;
     };
 
   private:
