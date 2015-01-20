@@ -1933,11 +1933,19 @@ bool FECS_DGGraph_saveToFile(FECS_DGGraphRef ref, const char * filePath, const F
   FECS_CATCH(false);
 }
 
-bool FECS_DGGraph_loadFromFile(FECS_DGGraphRef ref, const char * filePath, FECS_PersistenceInfo * info)
+bool FECS_DGGraph_loadFromFile(FECS_DGGraphRef ref, const char * filePath, FECS_PersistenceInfo * info, bool asReferenced)
 {
   FECS_TRY_CLEARERROR
   GETSMARTPTR(DGGraphImplPtr, graph, false)
-  return graph->loadFromFile(graph, filePath, (DGGraphImpl::PersistenceInfo *)info);
+  return graph->loadFromFile(graph, filePath, (DGGraphImpl::PersistenceInfo *)info, asReferenced);
+  FECS_CATCH(false);
+}
+
+FECS_DECL bool FECS_DGGraph_isReferenced(FECS_DGGraphRef ref)
+{
+  FECS_TRY_CLEARERROR
+  GETSMARTPTR(DGGraphImplPtr, graph, false)
+  return graph->isReferenced();
   FECS_CATCH(false);
 }
 

@@ -1611,7 +1611,10 @@ Class Outline
         bool saveToFile(const char * filePath, const PersistenceInfo * info = NULL);
 
         // constructs the node based on a persisted JSON file
-        bool loadFromFile(const char * filePath, PersistenceInfo * info = NULL);
+        bool loadFromFile(const char * filePath, PersistenceInfo * info = NULL, bool asReferenced = false);
+
+        // returns true if this graph is referenced from a file
+        bool isReferenced();
 
         // marks a member to be persisted
         void setMemberPersistence(const char * name, bool persistence);
@@ -1951,7 +1954,8 @@ FECS_DECL char * FECS_DGGraph_getPersistenceDataJSON(FECS_DGGraphRef ref, const 
 FECS_DECL bool FECS_DGGraph_setFromPersistenceDataDict(FECS_DGGraphRef ref, const FabricCore::Variant & dict, FECS_PersistenceInfo * info, const char * baseFilePath);
 FECS_DECL bool FECS_DGGraph_setFromPersistenceDataJSON(FECS_DGGraphRef ref, const char * json, FECS_PersistenceInfo * info, const char * baseFilePath);
 FECS_DECL bool FECS_DGGraph_saveToFile(FECS_DGGraphRef ref, const char * filePath, const FECS_PersistenceInfo * info);
-FECS_DECL bool FECS_DGGraph_loadFromFile(FECS_DGGraphRef ref, const char * filePath, FECS_PersistenceInfo * info);
+FECS_DECL bool FECS_DGGraph_loadFromFile(FECS_DGGraphRef ref, const char * filePath, FECS_PersistenceInfo * info, bool asReferenced);
+FECS_DECL bool FECS_DGGraph_isReferenced(FECS_DGGraphRef ref);
 FECS_DECL void FECS_DGGraph_setMemberPersistence(FECS_DGGraphRef ref, const char * name, bool persistence);
 
 FECS_DECL FECS_DGPortRef FECS_DGPort_copy(FECS_DGPortRef ref);
@@ -4584,9 +4588,17 @@ namespace FabricSplice
     }
 
     // constructs the node based on a persisted JSON file
-    bool loadFromFile(const char * filePath, PersistenceInfo * info = NULL)
+    bool loadFromFile(const char * filePath, PersistenceInfo * info = NULL, bool asReferenced = false)
     {
-      bool result = FECS_DGGraph_loadFromFile(mRef, filePath, info);
+      bool result = FECS_DGGraph_loadFromFile(mRef, filePath, info, asReferenced);
+      Exception::MaybeThrow();
+      return result;
+    }
+
+    // returns true if this graph is referenced from a file
+    bool isReferenced()
+    {
+      bool result = FECS_DGGraph_isReferenced(mRef);
       Exception::MaybeThrow();
       return result;
     }

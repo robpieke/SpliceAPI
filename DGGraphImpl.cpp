@@ -170,6 +170,7 @@ DGGraphImpl::DGGraphImpl(
   mIsClearing = true;
   mUsesEvalContext = false;
   mUserPointer = NULL;
+  mIsReferenced = false;
 
   try
   {
@@ -2449,100 +2450,108 @@ FabricCore::Variant DGGraphImpl::getPersistenceDataDict(const PersistenceInfo * 
     persistenceContextRT.setMember("filePath", FabricSplice::constructStringRTVal(info->filePath.getStringData()));
   }
 
-  FabricCore::Variant dgNodeListVar = FabricCore::Variant::CreateArray();
-  FabricCore::Variant portData = FabricCore::Variant::CreateDict();
-  for(DGNodeIt it = mDGNodes.begin(); it != mDGNodes.end(); it++)
+  // only persist the splice base path, if applicable
+  if(mIsReferenced)
   {
-    FabricCore::Variant dgNodeVar = FabricCore::Variant::CreateDict();
-
-    // only save non-default names
-    if(it->first != "DGNode")
-      dgNodeVar.setDictValue("name", FabricCore::Variant::CreateString(it->first.c_str()));
-
-    FabricCore::DGNode node = it->second.node;
-
-    FabricCore::Variant dependenciesVar = node.getDependencies_Variant();
-    if(dependenciesVar.isArray())
-    {
-      if(dependenciesVar.getArraySize() > 0)
-        dgNodeVar.setDictValue("dependencies", dependenciesVar);
-    }
-
-    FabricCore::Variant bindingListVar = FabricCore::Variant::CreateArray();
-
-    FabricCore::DGBindingList bindings = node.getBindingList();
-    for(uint32_t i=0;i<bindings.getCount();i++)
-    {
-      FabricCore::DGBinding binding = bindings.getBinding(i);
-      FabricCore::DGOperator op = binding.getOperator();
-
-      FabricCore::Variant bindingVar = FabricCore::Variant::CreateDict();
-      FabricCore::Variant opVar = FabricCore::Variant::CreateDict();
-
-      std::string opName = getPrettyDGOperatorName(op.getName());
-
-      opVar.setDictValue("name", FabricCore::Variant::CreateString(opName.c_str()));
-
-      // only save entry points which differ from the op name
-      if(opName != op.getEntryPoint())
-        opVar.setDictValue("entry", FabricCore::Variant::CreateString(op.getEntryPoint()));
-
-      // either store the filename with the code, or just the filename.
-      // this should be based on a user decision, if the kl file is based 
-      // on an external file, or not.
-      stringIt fileNameIt = mKLOperatorFileNames.find(op.getName());
-      if(fileNameIt == mKLOperatorFileNames.end())
-      {
-        // only save non-default names
-        std::string fileNameStr = op.getFilename();
-        if(fileNameStr != opName+".kl")
-          opVar.setDictValue("filename", FabricCore::Variant::CreateString(op.getFilename()));
-
-        // check if we have operator source code in the DCC UI somewhere
-        std::string klCode;
-        if(sGetOperatorSourceCodeFunc)
-        {
-          const char * klCodeCStr = (*sGetOperatorSourceCodeFunc)(getName().c_str(), opName.c_str());
-          if(klCodeCStr)
-            klCode = klCodeCStr;
-        }
-        if(klCode.length() == 0)
-        {
-          klCode = getKLOperatorSourceCode(opName);
-        }
-        opVar.setDictValue("kl", FabricCore::Variant::CreateString(klCode.c_str()));
-      }
-      else
-      {
-        opVar.setDictValue("filename", FabricCore::Variant::CreateString(fileNameIt->second.c_str()));
-      }
-
-      if(i < it->second.opPortMaps.size())
-      {
-        bool hasContent = !FabricCore::Variant::DictIter(it->second.opPortMaps[i]).isDone();
-        if(hasContent)
-          opVar.setDictValue("portmap", it->second.opPortMaps[i]);
-      }
-
-      // todo: we might want to store the parameter layout at a some point
-      bindingVar.setDictValue("operator", opVar);
-      bindingListVar.arrayAppend(bindingVar);
-    }
-    dgNodeVar.setDictValue("bindings", bindingListVar);
-
-    dgNodeListVar.arrayAppend(dgNodeVar);
+    dataVar.setDictValue("spliceFilePath", FabricCore::Variant::CreateString(mFilePath.c_str()));
   }
-  dataVar.setDictValue("nodes", dgNodeListVar);
+  else
+  {
+    FabricCore::Variant dgNodeListVar = FabricCore::Variant::CreateArray();
+    FabricCore::Variant portData = FabricCore::Variant::CreateDict();
+    for(DGNodeIt it = mDGNodes.begin(); it != mDGNodes.end(); it++)
+    {
+      FabricCore::Variant dgNodeVar = FabricCore::Variant::CreateDict();
 
-  FabricCore::Variant extensionListVar = FabricCore::Variant::CreateArray();
-  for(stringIt it = mLoadedExtensions.begin(); it != mLoadedExtensions.end(); it++)
-    extensionListVar.arrayAppend(FabricCore::Variant::CreateString(it->first.c_str()));
-  if(mLoadedExtensions.size() > 0)
-    dataVar.setDictValue("extensions", extensionListVar);
+      // only save non-default names
+      if(it->first != "DGNode")
+        dgNodeVar.setDictValue("name", FabricCore::Variant::CreateString(it->first.c_str()));
 
-  FabricCore::Variant portInfo;
-  getDGPortInfo(portInfo, persistenceContextRT);
-  dataVar.setDictValue("ports", portInfo);
+      FabricCore::DGNode node = it->second.node;
+
+      FabricCore::Variant dependenciesVar = node.getDependencies_Variant();
+      if(dependenciesVar.isArray())
+      {
+        if(dependenciesVar.getArraySize() > 0)
+          dgNodeVar.setDictValue("dependencies", dependenciesVar);
+      }
+
+      FabricCore::Variant bindingListVar = FabricCore::Variant::CreateArray();
+
+      FabricCore::DGBindingList bindings = node.getBindingList();
+      for(uint32_t i=0;i<bindings.getCount();i++)
+      {
+        FabricCore::DGBinding binding = bindings.getBinding(i);
+        FabricCore::DGOperator op = binding.getOperator();
+
+        FabricCore::Variant bindingVar = FabricCore::Variant::CreateDict();
+        FabricCore::Variant opVar = FabricCore::Variant::CreateDict();
+
+        std::string opName = getPrettyDGOperatorName(op.getName());
+
+        opVar.setDictValue("name", FabricCore::Variant::CreateString(opName.c_str()));
+
+        // only save entry points which differ from the op name
+        if(opName != op.getEntryPoint())
+          opVar.setDictValue("entry", FabricCore::Variant::CreateString(op.getEntryPoint()));
+
+        // either store the filename with the code, or just the filename.
+        // this should be based on a user decision, if the kl file is based 
+        // on an external file, or not.
+        stringIt fileNameIt = mKLOperatorFileNames.find(op.getName());
+        if(fileNameIt == mKLOperatorFileNames.end())
+        {
+          // only save non-default names
+          std::string fileNameStr = op.getFilename();
+          if(fileNameStr != opName+".kl")
+            opVar.setDictValue("filename", FabricCore::Variant::CreateString(op.getFilename()));
+
+          // check if we have operator source code in the DCC UI somewhere
+          std::string klCode;
+          if(sGetOperatorSourceCodeFunc)
+          {
+            const char * klCodeCStr = (*sGetOperatorSourceCodeFunc)(getName().c_str(), opName.c_str());
+            if(klCodeCStr)
+              klCode = klCodeCStr;
+          }
+          if(klCode.length() == 0)
+          {
+            klCode = getKLOperatorSourceCode(opName);
+          }
+          opVar.setDictValue("kl", FabricCore::Variant::CreateString(klCode.c_str()));
+        }
+        else
+        {
+          opVar.setDictValue("filename", FabricCore::Variant::CreateString(fileNameIt->second.c_str()));
+        }
+
+        if(i < it->second.opPortMaps.size())
+        {
+          bool hasContent = !FabricCore::Variant::DictIter(it->second.opPortMaps[i]).isDone();
+          if(hasContent)
+            opVar.setDictValue("portmap", it->second.opPortMaps[i]);
+        }
+
+        // todo: we might want to store the parameter layout at a some point
+        bindingVar.setDictValue("operator", opVar);
+        bindingListVar.arrayAppend(bindingVar);
+      }
+      dgNodeVar.setDictValue("bindings", bindingListVar);
+
+      dgNodeListVar.arrayAppend(dgNodeVar);
+    }
+    dataVar.setDictValue("nodes", dgNodeListVar);
+
+    FabricCore::Variant extensionListVar = FabricCore::Variant::CreateArray();
+    for(stringIt it = mLoadedExtensions.begin(); it != mLoadedExtensions.end(); it++)
+      extensionListVar.arrayAppend(FabricCore::Variant::CreateString(it->first.c_str()));
+    if(mLoadedExtensions.size() > 0)
+      dataVar.setDictValue("extensions", extensionListVar);
+
+    FabricCore::Variant portInfo;
+    getDGPortInfo(portInfo, persistenceContextRT);
+    dataVar.setDictValue("ports", portInfo);
+  }
 
   mIsPersisting = false;
 
@@ -2577,6 +2586,14 @@ bool DGGraphImpl::setFromPersistenceDataDict(
       mMetaData = metaDataVar->getStringData();
   if(mMetaData.length() > 0)
     dataVar.setDictValue("metaData", FabricCore::Variant::CreateString(mMetaData.c_str()));
+
+  // check if this is a referenced splice file
+  const FabricCore::Variant * spliceFilePathVar = dataVar.getDictValue("spliceFilePath");
+  if(spliceFilePathVar)
+  {
+    std::string spliceFilePath = spliceFilePathVar->getStringData();
+    return loadFromFile(thisGraph, spliceFilePath, info, true, errorOut);
+  }
 
   const FabricCore::Variant * nodesVar = dataVar.getDictValue("nodes");
   if(!nodesVar)
@@ -2980,13 +2997,16 @@ bool DGGraphImpl::loadFromFile(
   DGGraphImplPtr thisGraph,
   const std::string & filePath, 
   PersistenceInfo * info,
+  bool asReferenced,
   std::string * errorOut
 ) {
   if(!thisGraph)
     return LoggingImpl::reportError("Parameter thisGraph is not valid.", errorOut);
   if(thisGraph.get() != this)
     return LoggingImpl::reportError("Parameter thisGraph does not refer to this graph.", errorOut);
-  FILE * file = fopen(filePath.c_str(), "rb");
+
+  std::string resolvedFilePath = resolveEnvironmentVariables(filePath);
+  FILE * file = fopen(resolvedFilePath.c_str(), "rb");
   if(!file)
     return LoggingImpl::reportError("Invalid filePath '"+filePath+"'", errorOut);
 
@@ -3005,11 +3025,19 @@ bool DGGraphImpl::loadFromFile(
   std::string json = buffer;
   free(buffer);
 
+  mIsReferenced = asReferenced;
+  mFilePath = filePath;
+
   if(!setFromPersistenceDataJSON(thisGraph, json, info, filePath.c_str(), errorOut))
     return false;
   LoggingImpl::log("Loaded graph '"+getName()+"' from "+filePath);
 
   return true;
+}
+
+bool DGGraphImpl::isReferenced()
+{
+  return mIsReferenced;
 }
 
 bool DGGraphImpl::requireEvaluate()
