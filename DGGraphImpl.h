@@ -281,7 +281,10 @@ namespace FabricSpliceImpl
 
     /// constructs the node based on a persisted JSON file
     /// you need to pass in thisGraph as a shared pointer to avoid cycles in reference counting.
-    bool loadFromFile(DGGraphImplPtr thisGraph, const std::string & filePath, PersistenceInfo * info = NULL, std::string * errorOut = NULL);
+    bool loadFromFile(DGGraphImplPtr thisGraph, const std::string & filePath, PersistenceInfo * info = NULL, bool asReferenced = false, std::string * errorOut = NULL);
+
+    /// returns true if this graph is referenced from a file
+    bool isReferenced();
 
     /// request an evaluation on idle
     bool requireEvaluate();
@@ -395,6 +398,8 @@ namespace FabricSpliceImpl
     std::string mMetaData;
     FabricCore::RTVal mEvalContext;
     stringMap mKLOperatorFileNames;
+    bool mIsReferenced;
+    std::string mFilePath;
 
     // static members
     static DGOperatorSuffixMap sDGOperatorSuffix;
@@ -412,8 +417,8 @@ namespace FabricSpliceImpl
 
     // utilities
     bool memberPersistence(const std::string &name, const std::string &type, bool * requiresStorage = NULL);
-    std::string resolveRelativePath(const std::string & baseFile, const std::string text);
-    std::string resolveEnvironmentVariables(const std::string text);
+    static std::string resolveRelativePath(const std::string & baseFile, const std::string text);
+    static std::string resolveEnvironmentVariables(const std::string text);
   };
 };
 
