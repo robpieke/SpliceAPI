@@ -2922,12 +2922,13 @@ bool DGGraphImpl::setFromPersistenceDataDict(
       const FabricCore::Variant * opPortMapVar = operatorVar->getDictValue("portmap");
 
       std::string resolvedFilePath = resolveEnvironmentVariables(fileNameStr);
-      std::ifstream file(resolvedFilePath.c_str());
-      if(!file && baseFilePath)
+      std::ifstream *filePtr = new std::ifstream(resolvedFilePath.c_str());
+      if(!*filePtr && baseFilePath)
       {
         resolvedFilePath = resolveRelativePath(baseFilePath, resolvedFilePath);
-        file = std::ifstream(resolvedFilePath.c_str());
+        filePtr = new std::ifstream(resolvedFilePath.c_str());
       }
+      std::ifstream &file = *filePtr;
 
       bool isFileBased = false;
       if(file)
@@ -2953,6 +2954,7 @@ bool DGGraphImpl::setFromPersistenceDataDict(
           LoggingImpl::log(LoggingImpl::getError());
           LoggingImpl::clearError();
         }
+        delete filePtr;
         continue;
       }
 
@@ -2968,6 +2970,8 @@ bool DGGraphImpl::setFromPersistenceDataDict(
       DGOperatorIt opIt = sDGOperators.find(getRealDGOperatorName(opName.c_str()));
       if(opIt != sDGOperators.end())
         opIt->second.op.setFilename(fileNameStr.c_str());
+
+      delete filePtr;
     }
   }
 
