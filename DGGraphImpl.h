@@ -270,11 +270,11 @@ namespace FabricSpliceImpl
 
     /// constructs the node based on a variant dict
     /// you need to pass in thisGraph as a shared pointer to avoid cycles in reference counting.
-    bool setFromPersistenceDataDict(DGGraphImplPtr thisGraph, const FabricCore::Variant & dict, PersistenceInfo * info = NULL, std::string * errorOut = NULL);
+    bool setFromPersistenceDataDict(DGGraphImplPtr thisGraph, const FabricCore::Variant & dict, PersistenceInfo * info = NULL, const char * baseFilePath = NULL, std::string * errorOut = NULL);
 
     /// constructs the node based on a JSON string
     /// you need to pass in thisGraph as a shared pointer to avoid cycles in reference counting.
-    bool setFromPersistenceDataJSON(DGGraphImplPtr thisGraph, const std::string & json, PersistenceInfo * info = NULL, std::string * errorOut = NULL);
+    bool setFromPersistenceDataJSON(DGGraphImplPtr thisGraph, const std::string & json, PersistenceInfo * info = NULL, const char * baseFilePath = NULL, std::string * errorOut = NULL);
 
     /// persists the node description into a JSON file
     bool saveToFile(const std::string & filePath, const PersistenceInfo * info = NULL, std::string * errorOut = NULL);
@@ -411,7 +411,8 @@ namespace FabricSpliceImpl
     static GetOperatorSourceCodeFunc sGetOperatorSourceCodeFunc;
 
     // utilities
-    bool memberPersistence(const std::string &name, const std::string &type);
+    bool memberPersistence(const std::string &name, const std::string &type, bool * requiresStorage = NULL);
+    std::string resolveRelativePath(const std::string & baseFile, const std::string text);
     std::string resolveEnvironmentVariables(const std::string text);
   };
 };
