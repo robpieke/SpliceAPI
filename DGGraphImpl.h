@@ -113,7 +113,7 @@ namespace FabricSpliceImpl
     stringVector getDGNodeNames() const;
     
     /// adds a member to a given FabricCore::DGNode based on a member name and a type (rt)
-    bool addDGNodeMember(const std::string & name, const std::string & rt, FabricCore::Variant defaultValue = FabricCore::Variant(), const std::string & dgNode = "", const std::string & extension = "", std::string * errorOut = NULL);
+    bool addDGNodeMember(const std::string & name, const std::string & rt, FabricCore::Variant defaultValue = FabricCore::Variant(), const std::string & dgNode = "", const std::string & extension = "", bool autoInitObjects = true, std::string * errorOut = NULL);
     
     /// returns true if a specific member (on an optional specific FabricCore::DGNode) exists
     bool hasDGNodeMember(const std::string & name, const std::string & dgNode = "");

@@ -735,6 +735,7 @@ bool DGGraphImpl::addDGNodeMember(
   FabricCore::Variant defaultValue,
   const std::string & dgNode, 
   const std::string & extension,
+  bool autoInitObjects, 
   std::string * errorOut
 ) {
   FabricCore::DGNode node = getDGNode(dgNode);
@@ -778,7 +779,7 @@ bool DGGraphImpl::addDGNodeMember(
 
     // Initialize the Object here immedietly because persistence will load data into the value
     FabricCore::RTVal memberRTVal = node.getMemberSliceValue(name.c_str(), 0);
-    if(memberRTVal.isObject() && memberRTVal.isNullObject())
+    if(memberRTVal.isObject() && memberRTVal.isNullObject() && autoInitObjects)
     {
       memberRTVal = FabricSplice::constructObjectRTVal(rt.c_str());
       if(!memberRTVal.isNullObject())
@@ -2768,6 +2769,7 @@ bool DGGraphImpl::setFromPersistenceDataDict(
       defaultValue, 
       dgNodeName.c_str(),
       "",
+      autoInitObjects,
       errorOut
     );
     if(!addMemberResult)
@@ -2778,6 +2780,7 @@ bool DGGraphImpl::setFromPersistenceDataDict(
         FabricCore::Variant(), 
         dgNodeName.c_str(),
         "",
+        autoInitObjects,
         errorOut
       );
       if(addMemberResult)
