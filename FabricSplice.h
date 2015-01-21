@@ -135,8 +135,17 @@ The SPLICECAPI provides several global functions. These can be used to initializ
       // is finished with accessing the SPLICECAPI.
       void Finalize();
 
+      // Returns the major component of the Fabric version
+      uint8_t GetFabricVersionMaj();
+
+      // Returns the minor component of the Fabric version
+      uint8_t GetFabricVersionMin();
+
+      // Returns the revision component of the Fabric version
+      uint8_t GetFabricVersionRev();
+
       // Returns the Core Version number as a string
-      char const * GetCoreVersion();
+      char const * GetFabricVersionVersionStr();
 
       // Returns the Splice Version number as a string
       char const * GetSpliceVersion();
@@ -1747,7 +1756,10 @@ enum FECS_DGPort_Mode
 //=====================================================
 FECS_DECL void FECS_Initialize();
 FECS_DECL void FECS_Finalize();
-FECS_DECL const char * FECS_GetCoreVersion();
+FECS_DECL uint8_t FECS_GetFabricVersionMaj();
+FECS_DECL uint8_t FECS_GetFabricVersionMin();
+FECS_DECL uint8_t FECS_GetFabricVersionRev();
+FECS_DECL const char * FECS_GetFabricVersionStr();
 FECS_DECL const char * FECS_GetSpliceVersion();
 FECS_DECL void FECS_constructClient(FabricCore::Client & client, int guarded, FabricCore::ClientOptimizationType optType);
 FECS_DECL bool FECS_destroyClient(bool force);
@@ -2081,9 +2093,30 @@ namespace FabricSplice
     Exception::MaybeThrow();
   }
 
-  inline const char * GetCoreVersion()
+  inline uint8_t GetFabricVersionMaj()
   {
-    const char * result = FECS_GetCoreVersion();
+    uint8_t result = FECS_GetFabricVersionMaj();
+    Exception::MaybeThrow();
+    return result;
+  }
+
+  inline uint8_t GetFabricVersionMin()
+  {
+    uint8_t result = FECS_GetFabricVersionMin();
+    Exception::MaybeThrow();
+    return result;
+  }
+
+  inline uint8_t GetFabricVersionRev()
+  {
+    uint8_t result = FECS_GetFabricVersionRev();
+    Exception::MaybeThrow();
+    return result;
+  }
+
+  inline const char *GetFabricVersionStr()
+  {
+    const char *result = FECS_GetFabricVersionStr();
     Exception::MaybeThrow();
     return result;
   }

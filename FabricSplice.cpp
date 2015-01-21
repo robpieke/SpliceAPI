@@ -67,9 +67,24 @@ void FECS_Finalize()
   FECS_CATCH_VOID
 }
 
-const char * FECS_GetCoreVersion()
+uint8_t FECS_GetFabricVersionMaj()
 {
-  return coreversionconcat(SPLICE_MAJOR_VERSION, SPLICE_MINOR_VERSION);
+  return FabricCore::GetVersionMaj();
+}
+
+uint8_t FECS_GetFabricVersionMin()
+{
+  return FabricCore::GetVersionMin();
+}
+
+uint8_t FECS_GetFabricVersionRev()
+{
+  return FabricCore::GetVersionRev();
+}
+
+const char * FECS_GetFabricVersionStr()
+{
+  return FabricCore::GetVersionStr();
 }
 
 const char * FECS_GetSpliceVersion()
