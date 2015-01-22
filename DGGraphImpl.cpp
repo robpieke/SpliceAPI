@@ -175,6 +175,7 @@ DGGraphImpl::DGGraphImpl(
 ) {
 
   setName(name);
+  mOriginalName = getName();
   mDGNodeDefaultName = "DGNode";
   mRequiresEval = false;
   mIsPersisting = false;
@@ -343,7 +344,12 @@ stringMap DGGraphImpl::getDGGraphNamesMap()
 {
   stringMap result;
   for(size_t i=0;i<sAllDGGraphs.size();i++)
-    result.insert(stringPair(sAllDGGraphs[i]->getName(), ""));
+  {
+    if(result.find(sAllDGGraphs[i]->getName()) == result.end())
+      result.insert(stringPair(sAllDGGraphs[i]->getName(), ""));
+    if(result.find(sAllDGGraphs[i]->mOriginalName) == result.end())
+      result.insert(stringPair(sAllDGGraphs[i]->mOriginalName, ""));
+  }
   return result;
 }
 
@@ -2925,13 +2931,12 @@ bool DGGraphImpl::setFromPersistenceDataDict(
       const FabricCore::Variant * opPortMapVar = operatorVar->getDictValue("portmap");
 
       std::string resolvedFilePath = resolveEnvironmentVariables(fileNameStr);
-      std::ifstream *filePtr = new std::ifstream(resolvedFilePath.c_str());
-      if(!*filePtr && baseFilePath)
+      std::ifstream file(resolvedFilePath.c_str());
+      if(!file && baseFilePath)
       {
         resolvedFilePath = resolveRelativePath(baseFilePath, resolvedFilePath);
-        filePtr = new std::ifstream(resolvedFilePath.c_str());
+        file.open(resolvedFilePath.c_str());
       }
-      std::ifstream &file = *filePtr;
 
       bool isFileBased = false;
       if(file)
@@ -2957,7 +2962,6 @@ bool DGGraphImpl::setFromPersistenceDataDict(
           LoggingImpl::log(LoggingImpl::getError());
           LoggingImpl::clearError();
         }
-        delete filePtr;
         continue;
       }
 
@@ -2973,8 +2977,6 @@ bool DGGraphImpl::setFromPersistenceDataDict(
       DGOperatorIt opIt = sDGOperators.find(getRealDGOperatorName(opName.c_str()));
       if(opIt != sDGOperators.end())
         opIt->second.op.setFilename(fileNameStr.c_str());
-
-      delete filePtr;
     }
   }
 
