@@ -164,6 +164,7 @@ DGGraphImpl::DGGraphImpl(
 ) {
 
   setName(name);
+  mOriginalName = getName();
   mDGNodeDefaultName = "DGNode";
   mRequiresEval = false;
   mIsPersisting = false;
@@ -332,7 +333,12 @@ stringMap DGGraphImpl::getDGGraphNamesMap()
 {
   stringMap result;
   for(size_t i=0;i<sAllDGGraphs.size();i++)
-    result.insert(stringPair(sAllDGGraphs[i]->getName(), ""));
+  {
+    if(result.find(sAllDGGraphs[i]->getName()) == result.end())
+      result.insert(stringPair(sAllDGGraphs[i]->getName(), ""));
+    if(result.find(sAllDGGraphs[i]->mOriginalName) == result.end())
+      result.insert(stringPair(sAllDGGraphs[i]->mOriginalName, ""));
+  }
   return result;
 }
 

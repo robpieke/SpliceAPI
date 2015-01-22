@@ -400,6 +400,7 @@ namespace FabricSpliceImpl
     stringMap mKLOperatorFileNames;
     bool mIsReferenced;
     std::string mFilePath;
+    std::string mOriginalName;
 
     // static members
     static DGOperatorSuffixMap sDGOperatorSuffix;
