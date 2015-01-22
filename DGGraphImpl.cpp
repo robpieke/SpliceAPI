@@ -2921,7 +2921,7 @@ bool DGGraphImpl::setFromPersistenceDataDict(
       if(!file && baseFilePath)
       {
         resolvedFilePath = resolveRelativePath(baseFilePath, resolvedFilePath);
-        file = std::ifstream(resolvedFilePath.c_str());
+        file.open(resolvedFilePath.c_str());
       }
 
       bool isFileBased = false;
