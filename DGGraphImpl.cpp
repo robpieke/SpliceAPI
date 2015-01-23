@@ -2815,7 +2815,7 @@ bool DGGraphImpl::setFromPersistenceDataDict(
     {
       if(valuePersistenceDataVar->isString())
       {
-        FabricCore::DGNode dgNode = getDGNode(valueDGNodeVar->getStringData());
+        FabricCore::DGNode dgNode = getDGNode(dgNodeName.c_str());
         if(dgNode.isValid()){
           FabricCore::RTVal memberRTVal = dgNode.getMemberSliceValue(memberName.c_str(), 0);
           if(memberRTVal.isValid() && !memberRTVal.isNullObject())
