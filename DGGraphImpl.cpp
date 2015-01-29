@@ -3060,9 +3060,26 @@ bool DGGraphImpl::loadFromFile(
   return true;
 }
 
+bool DGGraphImpl::reloadFromFile(DGGraphImplPtr thisGraph, PersistenceInfo * info, std::string * errorOut)
+{
+  if(!isReferenced())
+  {
+    LoggingImpl::logError("The DGGraph '"+getName()+"' is not referenced, this it cannot be reloaded.");
+    return false;
+  }
+
+  clear();
+  return loadFromFile(thisGraph, mFilePath, info, true, errorOut);
+}
+
 bool DGGraphImpl::isReferenced()
 {
   return mIsReferenced;
+}
+
+const char * DGGraphImpl::getReferencedFilePath()
+{
+  return mFilePath.c_str();
 }
 
 bool DGGraphImpl::requireEvaluate()

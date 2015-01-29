@@ -1963,12 +1963,28 @@ bool FECS_DGGraph_loadFromFile(FECS_DGGraphRef ref, const char * filePath, FECS_
   FECS_CATCH(false);
 }
 
+bool FECS_DGGraph_reloadFromFile(FECS_DGGraphRef ref, FECS_PersistenceInfo * info)
+{
+  FECS_TRY_CLEARERROR
+  GETSMARTPTR(DGGraphImplPtr, graph, false)
+  return graph->reloadFromFile(graph, (DGGraphImpl::PersistenceInfo *)info);
+  FECS_CATCH(false);
+}
+
 FECS_DECL bool FECS_DGGraph_isReferenced(FECS_DGGraphRef ref)
 {
   FECS_TRY_CLEARERROR
   GETSMARTPTR(DGGraphImplPtr, graph, false)
   return graph->isReferenced();
   FECS_CATCH(false);
+}
+
+FECS_DECL char const * FECS_DGGraph_getReferencedFilePath(FECS_DGGraphRef ref)
+{
+  FECS_TRY_CLEARERROR
+  GETSMARTPTR(DGGraphImplPtr, graph, "")
+  return graph->getReferencedFilePath();
+  FECS_CATCH("");
 }
 
 FECS_DECL void FECS_DGGraph_setMemberPersistence(FECS_DGGraphRef ref, const char * name, bool persistence)

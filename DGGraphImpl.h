@@ -283,8 +283,14 @@ namespace FabricSpliceImpl
     /// you need to pass in thisGraph as a shared pointer to avoid cycles in reference counting.
     bool loadFromFile(DGGraphImplPtr thisGraph, const std::string & filePath, PersistenceInfo * info = NULL, bool asReferenced = false, std::string * errorOut = NULL);
 
+    /// reloads an already referenced graph from file
+    bool reloadFromFile(DGGraphImplPtr thisGraph, PersistenceInfo * info = NULL, std::string * errorOut = NULL);
+
     /// returns true if this graph is referenced from a file
     bool isReferenced();
+
+    /// returns the splice reference file path
+    const char * getReferencedFilePath();
 
     /// request an evaluation on idle
     bool requireEvaluate();
