@@ -2519,11 +2519,6 @@ FabricCore::Variant DGGraphImpl::getPersistenceDataDict(const PersistenceInfo * 
         stringIt fileNameIt = mKLOperatorFileNames.find(op.getName());
         if(fileNameIt == mKLOperatorFileNames.end())
         {
-          // only save non-default names
-          std::string fileNameStr = op.getFilename();
-          if(fileNameStr != opName+".kl")
-            opVar.setDictValue("filename", FabricCore::Variant::CreateString(op.getFilename()));
-
           // check if we have operator source code in the DCC UI somewhere
           std::string klCode;
           if(sGetOperatorSourceCodeFunc)
@@ -2925,8 +2920,12 @@ bool DGGraphImpl::setFromPersistenceDataDict(
 
       std::string klCode = "operator "+entry+"() {}";
       const FabricCore::Variant * operatorKLVar = operatorVar->getDictValue("kl");
+      bool fileNeedsToExist = true;
       if(operatorKLVar)
+      {
         klCode = operatorKLVar->getStringData();;
+        fileNeedsToExist = false;
+      }
 
       const FabricCore::Variant * opPortMapVar = operatorVar->getDictValue("portmap");
 
@@ -2945,6 +2944,12 @@ bool DGGraphImpl::setFromPersistenceDataDict(
         buffer << file.rdbuf();
         klCode = buffer.str();
         isFileBased = true;
+      }
+      else if(fileNeedsToExist)
+      {
+        LoggingImpl::logError("The KL file '"+fileNameStr+"' for KL operator '"+opName+"' cannot be found.");
+        LoggingImpl::clearError();
+        continue;
       }
 
       if(!constructKLOperator(
