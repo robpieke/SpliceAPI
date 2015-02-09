@@ -73,6 +73,7 @@ const FabricCore::Client * DGGraphImpl::constructClient(bool guarded, FabricCore
       options.guarded = 0;
     options.traceOperators = 0;
     options.optimizationType = optType;
+    options.licenseType = FabricCore::ClientLicenseType_Interactive;
 
     std::vector<const char *> extsPaths(sExtFolders.size());
     if(sExtFolders.size() > 0)
