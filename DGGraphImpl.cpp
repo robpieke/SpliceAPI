@@ -121,19 +121,20 @@ const FabricCore::Client * DGGraphImpl::constructClient(bool guarded, FabricCore
     klCode += "function Size String.length() {};\n";
     KLParserImpl::getParser("String", "String", klCode.c_str());
 
-    // load the extension we will always need
-    loadExtension("Math");
-    loadExtension("Geometry");
-    loadExtension("Singletons");
-    loadExtension("InlineDrawing");
-    loadExtension("Parameters");
-    loadExtension("Manipulation");
-    loadExtension("FileIO");
-    loadExtension("Util");
-    loadExtension("SpliceInterfaces");
+    // todo: this needs to be reenabled
+    // // load the extension we will always need
+    // loadExtension("Math");
+    // loadExtension("Geometry");
+    // loadExtension("Singletons");
+    // loadExtension("InlineDrawing");
+    // loadExtension("Parameters");
+    // loadExtension("Manipulation");
+    // loadExtension("FileIO");
+    // loadExtension("Util");
+    // loadExtension("SpliceInterfaces");
 
-    // define the singletons scope
-    sDrawingScope = FabricCore::RTVal::Create(*sClient, "InlineDrawingScope", 0, 0);
+    // // define the singletons scope
+    // sDrawingScope = FabricCore::RTVal::Create(*sClient, "InlineDrawingScope", 0, 0);
   }
   return (const FabricCore::Client *)sClient;
 }
@@ -435,7 +436,7 @@ bool DGGraphImpl::loadExtension(const std::string & extName, std::string * error
     {
       if( boost::filesystem::exists(paths[i])) {
         for ( boost::filesystem::directory_iterator end, dir(paths[i]); dir != end; ++dir ) {
-#if BOOST_VERSION == 105500
+#if BOOST_VERSION >= 105500
           std::string lastBit = dir->path().filename().string();
 #else
           std::string lastBit = dir->path().filename();
