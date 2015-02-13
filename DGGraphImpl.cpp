@@ -78,6 +78,8 @@ const FabricCore::Client * DGGraphImpl::constructClient(bool guarded, FabricCore
       options.extPaths = 0;
     }
     options.numExtsToLoad = 0;
+    options.slowOperationCallback = &klSlowOperationFunc;
+    options.licenseType = FabricCore::ClientLicenseType_Interactive;
 
     sClient = new FabricCore::Client(&klReportFunc, 0, &options);
 
@@ -122,8 +124,8 @@ const FabricCore::Client * DGGraphImpl::constructClient(bool guarded, FabricCore
     KLParserImpl::getParser("String", "String", klCode.c_str());
 
     // todo: this needs to be reenabled
-    // // load the extension we will always need
-    // loadExtension("Math");
+    // load the extension we will always need
+    loadExtension("Math");
     // loadExtension("Geometry");
     // loadExtension("Singletons");
     // loadExtension("InlineDrawing");
