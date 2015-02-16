@@ -134,20 +134,19 @@ const FabricCore::Client * DGGraphImpl::constructClient(bool guarded, FabricCore
     klCode += "function Size String.length() {};\n";
     KLParserImpl::getParser("String", "String", klCode.c_str());
 
-    // todo: this needs to be reenabled
     // load the extension we will always need
     loadExtension("Math");
-    // loadExtension("Geometry");
-    // loadExtension("Singletons");
-    // loadExtension("InlineDrawing");
-    // loadExtension("Parameters");
-    // loadExtension("Manipulation");
-    // loadExtension("FileIO");
-    // loadExtension("Util");
-    // loadExtension("SpliceInterfaces");
+    loadExtension("Geometry");
+    loadExtension("Singletons");
+    loadExtension("InlineDrawing");
+    loadExtension("Parameters");
+    loadExtension("Manipulation");
+    loadExtension("FileIO");
+    loadExtension("Util");
+    loadExtension("SpliceInterfaces");
 
-    // // define the singletons scope
-    // sDrawingScope = FabricCore::RTVal::Create(*sClient, "InlineDrawingScope", 0, 0);
+    // define the singletons scope
+    sDrawingScope = FabricCore::RTVal::Create(*sClient, "InlineDrawingScope", 0, 0);
   }
   return (const FabricCore::Client *)sClient;
 }
