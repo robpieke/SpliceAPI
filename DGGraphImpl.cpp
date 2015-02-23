@@ -2352,7 +2352,7 @@ bool DGGraphImpl::memberPersistence(const std::string &name, const std::string &
   return persistence;
 }
 
-void DGGraphImpl::getDGPortInfo(FabricCore::Variant & portInfo, FabricCore::RTVal persistenceContextRT)
+void DGGraphImpl::getDGPortInfo(FabricCore::Variant & portInfo, FabricCore::RTVal persistenceContextRT, bool forPersistence)
 {
   portInfo = FabricCore::Variant::CreateArray();
   for(DGPortIt it = mDGPorts.begin(); it != mDGPorts.end(); it++)
@@ -2360,8 +2360,11 @@ void DGGraphImpl::getDGPortInfo(FabricCore::Variant & portInfo, FabricCore::RTVa
     FabricCore::Variant valueVar = FabricCore::Variant::CreateDict();
     valueVar.setDictValue("name", FabricCore::Variant::CreateString(it->second->getName()));
 
+    if(!forPersistence)
+      valueVar.setDictValue("graph", FabricCore::Variant::CreateString(getName_cstr()));
+
     // don't persist the node if it is the default node
-    if(mDGNodes.size() > 1)
+    if(mDGNodes.size() > 1 || !forPersistence)
       valueVar.setDictValue("node", FabricCore::Variant::CreateString(it->second->getDGNodeName()));
 
     std::string dataType = it->second->getDataType();
@@ -2563,7 +2566,7 @@ FabricCore::Variant DGGraphImpl::getPersistenceDataDict(const PersistenceInfo * 
       dataVar.setDictValue("extensions", extensionListVar);
 
     FabricCore::Variant portInfo;
-    getDGPortInfo(portInfo, persistenceContextRT);
+    getDGPortInfo(portInfo, persistenceContextRT, true);
     dataVar.setDictValue("ports", portInfo);
   }
 

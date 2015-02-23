@@ -260,7 +260,7 @@ namespace FabricSpliceImpl
     */
 
     /// returns a variant encoding the information about all ports
-    void getDGPortInfo(FabricCore::Variant & portInfo, FabricCore::RTVal persistenceContextRT = FabricCore::RTVal());
+    void getDGPortInfo(FabricCore::Variant & portInfo, FabricCore::RTVal persistenceContextRT = FabricCore::RTVal(), bool forPersistence = false);
 
     /// returns a dictionary of the persistence data of a node
     FabricCore::Variant getPersistenceDataDict(const PersistenceInfo * info = NULL);
