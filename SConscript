@@ -129,7 +129,7 @@ if not os.path.exists(BOOST_DIR):
   sys.exit(1)
 
 boostFlags = {
-  'CPPPATH': [BOOST_DIR],
+  'CPPPATH': [os.path.join(BOOST_DIR, 'include')],
   'LIBPATH': [os.path.join(BOOST_DIR, 'lib')],
 }
 if FABRIC_BUILD_OS == 'Windows':
