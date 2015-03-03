@@ -6,6 +6,7 @@ import os, sys, platform, copy
 
 Import(
   'parentEnv',
+  'FTL_INCLUDE_DIR',
   'FABRIC_DIR',
   'FABRIC_SPLICE_VERSION',
   'STAGE_DIR',
@@ -114,6 +115,8 @@ parentEnv.Append(CPPDEFINES=['SPLICE_API_VERSION='+''.join(apiVersion)])
 parentEnv.Append(CPPDEFINES=['SPLICE_MAJOR_VERSION='+FABRIC_SPLICE_VERSION.split('.')[0]])
 parentEnv.Append(CPPDEFINES=['SPLICE_MINOR_VERSION='+FABRIC_SPLICE_VERSION.split('.')[1]])
 parentEnv.Append(CPPDEFINES=['SPLICE_REVISION_VERSION='+FABRIC_SPLICE_VERSION.split('.')[2]])
+
+parentEnv.Append(CPPPATH=[FTL_INCLUDE_DIR])
 
 if FABRIC_BUILD_OS == 'Windows':
   parentEnv.Append(LIBS = ['advapi32', 'shell32'])

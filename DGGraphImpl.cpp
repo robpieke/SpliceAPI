@@ -4,12 +4,13 @@
 #include "SceneManagementImpl.h"
 #include "KLParserImpl.h"
 
+#include <FTL/FS.h>
+
 #include <fstream>
 #include <sstream>
 #include <stdlib.h>
 #include <stdio.h>
 
-#include <boost/filesystem.hpp>
 #include <boost/version.hpp>
 #include "FabricSplice.h"
 
@@ -450,21 +451,21 @@ bool DGGraphImpl::loadExtension(const std::string & extName, std::string * error
     if(fpmFile)
       break;
 
+    std::vector<std::string> additionalPaths;
+
     // add subfolders
     try
     {
-      if( boost::filesystem::exists(paths[i])) {
-        for ( boost::filesystem::directory_iterator end, dir(paths[i]); dir != end; ++dir ) {
-#if BOOST_VERSION >= 105500
-          std::string lastBit = dir->path().filename().string();
-#else
-          std::string lastBit = dir->path().filename();
-#endif
-          if(lastBit == "." || lastBit == "..")
+      FTL::StrRef path = paths[i];
+      if( FTL::FSExists(path)) {
+        std::vector<std::string> entries;
+        FTL::FSDirAppendEntries(path, entries);
+        for ( size_t i=0; i<entries.size(); ++i ) {
+          FTL::StrRef entry = entries[i];
+          std::string entryPath = FTL::PathJoin( path, entry );
+          if(!FTL::FSIsDir(entryPath))
             continue;
-          if(!boost::filesystem::is_directory(dir->path()))
-            continue;
-          paths.push_back(dir->path().string());
+          additionalPaths.push_back(entryPath);
         }
       }
     }
@@ -473,6 +474,10 @@ bool DGGraphImpl::loadExtension(const std::string & extName, std::string * error
       LoggingImpl::reportError(std::string("Unable to read Ext sub-folder: '") +
           paths[i] + std::string("'"), errorOut);
     }
+
+    paths.insert(
+      paths.end(), additionalPaths.begin(), additionalPaths.end()
+      );
   }
 
   std::vector<std::string> extKlFiles;
