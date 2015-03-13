@@ -3096,6 +3096,10 @@ bool DGGraphImpl::requireEvaluate()
 {
   if(mRequiresEval)
     return false;
+
+  for(DGNodeIt nodeIt = mDGNodes.begin(); nodeIt != mDGNodes.end(); nodeIt++)
+    nodeIt->second.node.setDirty();
+
   mRequiresEval = true;
   return true;
 }
