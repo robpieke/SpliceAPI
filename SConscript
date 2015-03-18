@@ -260,6 +260,9 @@ Export('spliceDistHeader')
 
 installedFiles = [installedStaticLibrary, installedSharedLibrary, spliceDistHeader]
 
+if FABRIC_BUILD_OS == 'Windows':
+  installedFiles += sharedEnv.Install(STAGE_DIR.Dir('bin'), sharedLibrary[:2])
+
 spliceFlags = {
   'CPPPATH': [STAGE_DIR],
   'LIBS': [installedStaticLibrary],
