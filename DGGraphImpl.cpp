@@ -3065,7 +3065,7 @@ bool DGGraphImpl::loadFromFile(
 
   if(!setFromPersistenceDataJSON(thisGraph, json, info, resolvedFilePath.c_str(), errorOut))
     return false;
-  LoggingImpl::log("Loaded graph '"+getName()+"' from "+resolvedFilePath);
+  LoggingImpl::log("Loaded graph '"+getName()+"' from "+filePath);
 
   return true;
 }
