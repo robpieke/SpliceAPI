@@ -426,6 +426,7 @@ namespace FabricSpliceImpl
     bool memberPersistence(const std::string &name, const std::string &type, bool * requiresStorage = NULL);
     static std::string resolveRelativePath(const std::string & baseFile, const std::string text);
     static std::string resolveEnvironmentVariables(const std::string text);
+    FILE* findFileInSearchPath(std::string& resolvedFilePath);
   };
 };
 

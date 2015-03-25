@@ -11,6 +11,7 @@
 
 #include <boost/filesystem.hpp>
 #include <boost/version.hpp>
+#include <boost/algorithm/string.hpp>
 #include "FabricSplice.h"
 
 using namespace FabricSpliceImpl;
@@ -454,7 +455,7 @@ bool DGGraphImpl::loadExtension(const std::string & extName, std::string * error
     {
       if( boost::filesystem::exists(paths[i])) {
         for ( boost::filesystem::directory_iterator end, dir(paths[i]); dir != end; ++dir ) {
-#if BOOST_VERSION == 105500
+#if BOOST_FILESYSTEM_VERSION > 2
           std::string lastBit = dir->path().filename().string();
 #else
           std::string lastBit = dir->path().filename();
@@ -3036,6 +3037,11 @@ bool DGGraphImpl::loadFromFile(
 
   std::string resolvedFilePath = resolveEnvironmentVariables(filePath);
   FILE * file = fopen(resolvedFilePath.c_str(), "rb");
+  
+  // try using search path
+  if(!file)
+    file = findFileInSearchPath(resolvedFilePath);
+
   if(!file)
     return LoggingImpl::reportError("Invalid filePath '"+filePath+"'", errorOut);
 
@@ -3057,9 +3063,9 @@ bool DGGraphImpl::loadFromFile(
   mIsReferenced = asReferenced;
   mFilePath = filePath;
 
-  if(!setFromPersistenceDataJSON(thisGraph, json, info, filePath.c_str(), errorOut))
+  if(!setFromPersistenceDataJSON(thisGraph, json, info, resolvedFilePath.c_str(), errorOut))
     return false;
-  LoggingImpl::log("Loaded graph '"+getName()+"' from "+filePath);
+  LoggingImpl::log("Loaded graph '"+getName()+"' from "+resolvedFilePath);
 
   return true;
 }
@@ -3163,3 +3169,25 @@ std::string DGGraphImpl::resolveEnvironmentVariables(const std::string text)
   }
   return output;
 }
+
+FILE* DGGraphImpl::findFileInSearchPath(std::string& resolvedFilePath)
+{
+  FILE* file = NULL;
+  const char * searchPaths = getenv("FABRIC_NODES_PATH");
+  if(searchPaths != NULL)
+  {
+    std::vector<std::string> paths;
+    boost::split(paths, searchPaths, boost::is_any_of(":"));
+    for(size_t i = 0; i < paths.size(); i++)
+    {
+      boost::filesystem::path path(resolveEnvironmentVariables(paths[i]));
+      path /= resolvedFilePath;
+      resolvedFilePath = path.string();
+      file = fopen(resolvedFilePath.c_str(), "rb");
+      if(file)
+        break;
+    }
+  }
+  return file;
+}
+
