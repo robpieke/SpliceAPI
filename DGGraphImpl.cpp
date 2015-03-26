@@ -1862,6 +1862,7 @@ bool DGGraphImpl::setKLOperatorSourceCode(
     return false;
 
   LoggingImpl::log("KL Operator '"+name+"' sourcecode updated.");
+  LoggingImpl::clearError();
 
   requireDGCheck();
   return checkErrors(errorOut);
