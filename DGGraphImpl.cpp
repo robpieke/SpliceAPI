@@ -1438,9 +1438,15 @@ bool DGGraphImpl::constructKLOperator(
   }
   else
   {
+#ifdef _WIN32
+    char buffer[32];
+    _itoa_s(suffixIt->second, buffer, 32, 10);
+    opName += std::string("_") + std::string(buffer);
+#else
     std::stringstream ss;
     ss << suffixIt->second;
     opName += std::string("_") + ss.str();
+#endif
     suffixIt->second++;
   }
 
@@ -1502,6 +1508,17 @@ bool DGGraphImpl::removeKLOperator(const std::string & name, const std::string &
   {
     opName = it->second;
     mDGOperatorNameMap.erase(it);
+  }
+  else
+  {
+    for(it = mDGOperatorNameMap.begin(); it != mDGOperatorNameMap.end(); it++)
+    {
+      if(it->second == name)
+      {
+        mDGOperatorNameMap.erase(it);
+        break;
+      }
+    }
   }
 
   FabricCore::DGNode node = getDGNode(dgNodeName);
