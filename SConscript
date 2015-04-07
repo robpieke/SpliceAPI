@@ -30,7 +30,7 @@ if FABRIC_BUILD_OS == "Windows":
   baseLinkFlags = ['chkstk.obj']
   spliceDebugFlags = {
     'CCFLAGS': baseCPPFlags + ['/Od', '/Z7', '/MTd', '/DEBUG'],
-    'CPPDEFINES': baseCPPDefines + ['_ITERATOR_DEBUG_LEVEL=0', '_DEBUG', 'DEBUG'],
+    'CPPDEFINES': baseCPPDefines + ['_ITERATOR_DEBUG_LEVEL=2', '_DEBUG', 'DEBUG'],
     'LINKFLAGS': baseLinkFlags + ['/DEBUG', '/NODEFAULTLIB:LIBCMT'],
   }
   spliceReleaseFlags = {
