@@ -1836,7 +1836,7 @@ bool DGGraphImpl::setKLOperatorSourceCode(
   {
     op.setEntryPoint(entryPoint.c_str());
     op.setSourceCode((sourceCode+"").c_str());
-    if(op.getFilename() == "")
+    if(std::string(op.getFilename()).empty())
       op.setFilename((name+".kl").c_str());
   }
   catch(FabricCore::Exception e)
