@@ -3204,9 +3204,8 @@ FILE* DGGraphImpl::findFileInSearchPath(std::string& resolvedFilePath)
     boost::split(paths, searchPaths, boost::is_any_of(":"));
     for(size_t i = 0; i < paths.size(); i++)
     {
-      boost::filesystem::path path(resolveEnvironmentVariables(paths[i]));
-      path /= resolvedFilePath;
-      resolvedFilePath = path.string();
+      FTL::StrRef path(resolveEnvironmentVariables(paths[i]));
+      resolvedFilePath = FTL::PathJoin(path, resolvedFilePath);
       file = fopen(resolvedFilePath.c_str(), "rb");
       if(file)
         break;
