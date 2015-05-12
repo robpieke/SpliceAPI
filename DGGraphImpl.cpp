@@ -12,6 +12,7 @@
 #include <stdio.h>
 
 #include <boost/version.hpp>
+#include <boost/algorithm/string.hpp>
 #include "FabricSplice.h"
 
 using namespace FabricSpliceImpl;
@@ -1443,9 +1444,15 @@ bool DGGraphImpl::constructKLOperator(
   }
   else
   {
+#ifdef _WIN32
+    char buffer[32];
+    _itoa_s(suffixIt->second, buffer, 32, 10);
+    opName += std::string("_") + std::string(buffer);
+#else
     std::stringstream ss;
     ss << suffixIt->second;
     opName += std::string("_") + ss.str();
+#endif
     suffixIt->second++;
   }
 
@@ -1507,6 +1514,17 @@ bool DGGraphImpl::removeKLOperator(const std::string & name, const std::string &
   {
     opName = it->second;
     mDGOperatorNameMap.erase(it);
+  }
+  else
+  {
+    for(it = mDGOperatorNameMap.begin(); it != mDGOperatorNameMap.end(); it++)
+    {
+      if(it->second == name)
+      {
+        mDGOperatorNameMap.erase(it);
+        break;
+      }
+    }
   }
 
   FabricCore::DGNode node = getDGNode(dgNodeName);
@@ -1850,6 +1868,7 @@ bool DGGraphImpl::setKLOperatorSourceCode(
     return false;
 
   LoggingImpl::log("KL Operator '"+name+"' sourcecode updated.");
+  LoggingImpl::clearError();
 
   requireDGCheck();
   return checkErrors(errorOut);
@@ -3042,6 +3061,11 @@ bool DGGraphImpl::loadFromFile(
 
   std::string resolvedFilePath = resolveEnvironmentVariables(filePath);
   FILE * file = fopen(resolvedFilePath.c_str(), "rb");
+  
+  // try using search path
+  if(!file)
+    file = findFileInSearchPath(resolvedFilePath);
+
   if(!file)
     return LoggingImpl::reportError("Invalid filePath '"+filePath+"'", errorOut);
 
@@ -3063,7 +3087,7 @@ bool DGGraphImpl::loadFromFile(
   mIsReferenced = asReferenced;
   mFilePath = filePath;
 
-  if(!setFromPersistenceDataJSON(thisGraph, json, info, filePath.c_str(), errorOut))
+  if(!setFromPersistenceDataJSON(thisGraph, json, info, resolvedFilePath.c_str(), errorOut))
     return false;
   LoggingImpl::log("Loaded graph '"+getName()+"' from "+filePath);
 
@@ -3169,3 +3193,25 @@ std::string DGGraphImpl::resolveEnvironmentVariables(const std::string text)
   }
   return output;
 }
+
+FILE* DGGraphImpl::findFileInSearchPath(std::string& resolvedFilePath)
+{
+  FILE* file = NULL;
+  const char * searchPaths = getenv("FABRIC_NODES_PATH");
+  if(searchPaths != NULL)
+  {
+    std::vector<std::string> paths;
+    boost::split(paths, searchPaths, boost::is_any_of(":"));
+    for(size_t i = 0; i < paths.size(); i++)
+    {
+      boost::filesystem::path path(resolveEnvironmentVariables(paths[i]));
+      path /= resolvedFilePath;
+      resolvedFilePath = path.string();
+      file = fopen(resolvedFilePath.c_str(), "rb");
+      if(file)
+        break;
+    }
+  }
+  return file;
+}
+
