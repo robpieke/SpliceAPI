@@ -1,5 +1,9 @@
 // Copyright 2010-2013 Fabric Engine Inc. All rights reserved.
 
+// NOTE: The Fabric Splice API will be deprecated in 2.0. 
+// For new integrations please just use the FabricCore API 
+// and Fabric Services DFGWrapper.
+
 #ifndef __FabricSplice_H__
 #define __FabricSplice_H__
 
@@ -16,6 +20,8 @@
 
 | |FABRIC_PRODUCT_NAME| version |FABRIC_VERSION|
 | |FABRIC_COPYRIGHT|
+
+.. note:: The SpliceAPI will be deprecated in Fabric Engine 2.0.
 
 Table of Contents
 -----------------
