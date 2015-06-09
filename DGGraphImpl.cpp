@@ -2953,7 +2953,8 @@ bool DGGraphImpl::setFromPersistenceDataDict(
       if(operatorKLVar)
       {
         klCode = operatorKLVar->getStringData();;
-        fileNeedsToExist = false;
+        if (!klCode.empty())
+          fileNeedsToExist = false;
       }
 
       const FabricCore::Variant * opPortMapVar = operatorVar->getDictValue("portmap");
@@ -2976,9 +2977,8 @@ bool DGGraphImpl::setFromPersistenceDataDict(
       }
       else if(fileNeedsToExist)
       {
-        LoggingImpl::logError("The KL file '"+fileNameStr+"' for KL operator '"+opName+"' cannot be found.");
-        LoggingImpl::clearError();
-        continue;
+        std::string errorString = "The KL file '"+fileNameStr+"' for KL operator '"+opName+"' cannot be found.";
+        throw FabricCore::Exception(errorString.c_str());
       }
 
       if(!constructKLOperator(
