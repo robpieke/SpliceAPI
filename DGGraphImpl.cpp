@@ -3058,7 +3058,10 @@ bool DGGraphImpl::loadFromFile(
   
   // try using search path
   if(!file)
+  {
+    resolvedFilePath = filePath;
     file = findFileInSearchPath(resolvedFilePath);
+  }
 
   if(!file)
     return LoggingImpl::reportError("Invalid filePath '"+filePath+"'", errorOut);
@@ -3191,19 +3194,29 @@ std::string DGGraphImpl::resolveEnvironmentVariables(const std::string text)
 FILE* DGGraphImpl::findFileInSearchPath(std::string& resolvedFilePath)
 {
   FILE* file = NULL;
+  std::string userPath = resolvedFilePath;
   const char * searchPaths = getenv("FABRIC_NODES_PATH");
+
   if(searchPaths != NULL)
   {
     std::vector<std::string> paths;
-    boost::split(paths, searchPaths, boost::is_any_of(":"));
+#ifdef _WIN32    
+    boost::split(paths, searchPaths, boost::is_any_of(";,"));
+#else
+    boost::split(paths, searchPaths, boost::is_any_of(":;,"));
+#endif
     for(size_t i = 0; i < paths.size(); i++)
     {
       boost::filesystem::path path(resolveEnvironmentVariables(paths[i]));
-      path /= resolvedFilePath;
+      path /= userPath;
       resolvedFilePath = path.string();
+      LoggingImpl::log(("Testing filepath: "+resolvedFilePath).c_str());
       file = fopen(resolvedFilePath.c_str(), "rb");
       if(file)
+      {
+        LoggingImpl::log(("Resolved to filepath: "+resolvedFilePath).c_str());
         break;
+      }
     }
   }
   return file;
