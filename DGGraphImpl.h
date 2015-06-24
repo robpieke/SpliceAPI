@@ -61,19 +61,6 @@ namespace FabricSpliceImpl
     /// sit in the UI somewhere but hasn't been pushed to the DGGraph.
     static void setDCCOperatorSourceCodeCallback(GetOperatorSourceCodeFunc func);
 
-    /* 
-      Licensing
-    */
-
-    /// returns true if a valid license has been found
-    static bool isLicenseValid(std::string * errorOut = NULL);
-
-    /// installs a license based on server name
-    static bool setLicenseServer(const std::string & serverName, std::string * errorOut = NULL);
-
-    /// installs a standalone license
-    static bool setStandaloneLicense(const std::string & license, std::string * errorOut = NULL);
-
     /*
       Metadata
     */
