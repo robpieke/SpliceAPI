@@ -333,23 +333,6 @@ void DGGraphImpl::setDCCOperatorSourceCodeCallback(DGGraphImpl::GetOperatorSourc
   sGetOperatorSourceCodeFunc = func;
 }
 
-bool DGGraphImpl::isLicenseValid(std::string * errorOut)
-{
-  return FabricCore::IsLicenseValid();
-}
-
-bool DGGraphImpl::setLicenseServer(const std::string & serverName, std::string * errorOut)
-{
-  FabricCore::SetLicenseServer(serverName.c_str());
-  return false;
-}
-
-bool DGGraphImpl::setStandaloneLicense(const std::string & license, std::string * errorOut)
-{
-  FabricCore::SetStandaloneLicense(license.c_str());
-  return false;
-}
-
 stringMap DGGraphImpl::getDGGraphNamesMap()
 {
   stringMap result;

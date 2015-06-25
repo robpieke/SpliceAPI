@@ -140,27 +140,6 @@ FECS_DECL void FECS_setDCCOperatorSourceCodeCallback(FECS_GetOperatorSourceCodeF
   FECS_CATCH_VOID
 }
 
-bool FECS_isLicenseValid()
-{
-  FECS_TRY_CLEARERROR
-  return DGGraphImpl::isLicenseValid();
-  FECS_CATCH(false)
-}
-
-bool FECS_setLicenseServer(const char * serverName)
-{
-  FECS_TRY_CLEARERROR
-  return DGGraphImpl::setLicenseServer(serverName);
-  FECS_CATCH(false)
-}
-
-bool FECS_setStandaloneLicense(const char * license)
-{
-  FECS_TRY_CLEARERROR
-  return DGGraphImpl::setStandaloneLicense(license);
-  FECS_CATCH(false)
-}
-
 void FECS_ConstructRTVal(FabricCore::RTVal & result, const char * rt)
 {
   FECS_TRY_CLEARERROR

@@ -165,20 +165,6 @@ The SPLICECAPI provides several global functions. These can be used to initializ
       // returns the ID for the client-context used by splice
       char const * GetClientContextID();
 
-      // isLicenseValid returns true if the Creation Platform
-      // license on the current running host is valid. This may
-      // be resolving a network floating or a standalone license.
-      bool isLicenseValid();
-      
-      // setLicenseServer can be called with the name and port
-      // of the RLM license server on the network.
-      void setLicenseServer(const char * serverName);
-      
-      // setStandaloneLicense can be called with the 
-      // standalone license text to setup the license
-      // on the current running host.
-      void setStandaloneLicense(const char * license);
-
       // addExtFolder can be used to add paths to KL extension
       // resolval mechanism. First the folders listed in the
       // FABRIC_EXTS_PATH variable will be checked, followed
@@ -1776,9 +1762,6 @@ FECS_DECL const char * FECS_GetSpliceVersion();
 FECS_DECL void FECS_constructClient(FabricCore::Client & client, int guarded, FabricCore::ClientOptimizationType optType);
 FECS_DECL bool FECS_destroyClient(bool force);
 FECS_DECL char const * FECS_GetClientContextID();
-FECS_DECL bool FECS_isLicenseValid();
-FECS_DECL bool FECS_setLicenseServer(const char * serverName);
-FECS_DECL bool FECS_setStandaloneLicense(const char * license);
 FECS_DECL bool FECS_addExtFolder(const char * folder);
 FECS_DECL void FECS_setDCCOperatorSourceCodeCallback(FECS_GetOperatorSourceCodeFunc func);
 FECS_DECL void FECS_ConstructRTVal(FabricCore::RTVal & result, const char * rt);
@@ -2160,27 +2143,6 @@ namespace FabricSplice
   inline char const * GetClientContextID()
   {
     char const * result = FECS_GetClientContextID();
-    Exception::MaybeThrow();
-    return result;
-  }
-
-  inline bool isLicenseValid()
-  {
-    bool result = FECS_isLicenseValid();
-    Exception::MaybeThrow();
-    return result;
-  }
-
-  inline bool setLicenseServer(const char * serverName)
-  {
-    bool result = FECS_setLicenseServer(serverName);
-    Exception::MaybeThrow();
-    return result;
-  }
-
-  inline bool setStandaloneLicense(const char * license)
-  {
-    bool result = FECS_setStandaloneLicense(license);
     Exception::MaybeThrow();
     return result;
   }
