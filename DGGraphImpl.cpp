@@ -5,6 +5,8 @@
 #include "KLParserImpl.h"
 
 #include <FTL/FS.h>
+#include <Persistence/RTValToJSONEncoder.hpp>
+#include <Persistence/RTValFromJSONDecoder.hpp>
 
 #include <fstream>
 #include <sstream>
@@ -26,6 +28,8 @@ stringMap DGGraphImpl::sClientRTs;
 std::vector<DGGraphImpl*> DGGraphImpl::sAllDGGraphs;
 DGGraphImpl::DGOperatorMap DGGraphImpl::sDGOperators;
 DGGraphImpl::DGOperatorSuffixMap DGGraphImpl::sDGOperatorSuffix;
+FabricServices::Persistence::RTValToJSONEncoder sRTValEncoder;
+FabricServices::Persistence::RTValFromJSONDecoder sRTValDecoder;
 
 stringVector DGGraphImpl::sExtFolders;
 DGGraphImpl::GetOperatorSourceCodeFunc DGGraphImpl::sGetOperatorSourceCodeFunc = NULL;
@@ -76,6 +80,8 @@ const FabricCore::Client * DGGraphImpl::constructClient(bool guarded, FabricCore
     options.traceOperators = 0;
     options.optimizationType = optType;
     options.licenseType = FabricCore::ClientLicenseType_Interactive;
+    options.rtValToJSONEncoder = &sRTValEncoder;
+    options.rtValFromJSONDecoder = &sRTValDecoder;
 
     std::vector<const char *> extsPaths(sExtFolders.size());
     if(sExtFolders.size() > 0)
@@ -2481,7 +2487,8 @@ FabricCore::Variant DGGraphImpl::getPersistenceDataDict(const PersistenceInfo * 
   if(mMetaData.length() > 0)
     dataVar.setDictValue("metaData", FabricCore::Variant::CreateString(mMetaData.c_str()));
 
-  FabricCore::RTVal persistenceContextRT = FabricSplice::constructRTVal("PersistenceContext");
+  FabricCore::RTVal persistenceContextRT = FabricSplice::constructObjectRTVal("PersistenceContext");
+  persistenceContextRT = persistenceContextRT.callMethod("PersistenceContext", "getInstance", 0, 0);
   if(info != NULL)
   {
     FabricCore::Variant infoVar = FabricCore::Variant::CreateDict();
@@ -2665,7 +2672,8 @@ bool DGGraphImpl::setFromPersistenceDataDict(
     }
   }
 
-  FabricCore::RTVal persistenceContextRT = FabricSplice::constructRTVal("PersistenceContext");
+  FabricCore::RTVal persistenceContextRT = FabricSplice::constructObjectRTVal("PersistenceContext");
+  persistenceContextRT = persistenceContextRT.callMethod("PersistenceContext", "getInstance", 0, 0);
   if(info != NULL)
   {
     // [phtaylor 16/07/2014] Once again, I don't know why we are writing out data during a load operation. 
