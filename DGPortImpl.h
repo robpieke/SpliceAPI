@@ -29,7 +29,7 @@ namespace FabricSpliceImpl
       Constructors / Destructors
     */
 
-    ~DGPortImpl();
+    virtual ~DGPortImpl();
 
     /*
       Basic data getters

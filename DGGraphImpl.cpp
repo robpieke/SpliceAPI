@@ -808,7 +808,6 @@ bool DGGraphImpl::hasDGNodeMember(const std::string & name, const std::string & 
   FabricCore::DGNode node = getDGNode(dgNode);
   FabricCore::Variant members = node.getMembers_Variant();
 
-  bool found = false;
   for(FabricCore::Variant::DictIter keyIter(members); !keyIter.isDone(); keyIter.next())
   {
     std::string key = keyIter.getKey()->getStringData();
@@ -1535,7 +1534,7 @@ bool DGGraphImpl::removeKLOperator(const std::string & name, const std::string &
       bindings.remove(i);
       for(size_t j=0;j<mBindings.size();j++)
       {
-        if(dgNodeName == mBindings[j].dgNode && i == mBindings[j].index)
+        if(dgNodeName == mBindings[j].dgNode && (size_t)i == mBindings[j].index)
         {
           bindingsToRemove.push_back(j);
           break;
@@ -1675,9 +1674,6 @@ bool DGGraphImpl::setKLOperatorIndex(const std::string & name, unsigned int inde
     LoggingImpl::reportError("Operator '"+name+"' already at the given index.", errorOut);
     return false;
   }
-
-  unsigned int lowIndex = newIndex > prevIndex ? prevIndex : newIndex;
-  unsigned int highIndex = newIndex > prevIndex ? newIndex : prevIndex;
 
   FabricCore::DGNode node = getDGNode(prevBindingData->dgNode);
   FabricCore::DGBindingList bindings = node.getBindingList();
@@ -1881,6 +1877,7 @@ void DGGraphImpl::loadKLOperatorSourceCode(const std::string & name, const std::
 
   size_t readBytes = fread(buffer, 1, fileSize, file);
   assert(readBytes == fileSize);
+  (void)readBytes;
 
   fclose(file);
 
@@ -2138,7 +2135,6 @@ bool DGGraphImpl::validateKLOperator(const std::string & opName, bool logValidat
 
   // by now we know that all nodes utilizing this 
   // operator have the right data layout, so let's update the bindings
-  bool updatedSourceCode = false;
   for(size_t i=0;i<sAllDGGraphs.size();i++)
   {
     for(size_t j=0;j<sAllDGGraphs[i]->mBindings.size();j++)
@@ -3072,6 +3068,7 @@ bool DGGraphImpl::loadFromFile(
 
   size_t readBytes = fread(buffer, 1, fileSize, file);
   assert(readBytes == fileSize);
+  (void)readBytes;
 
   fclose(file);
 
@@ -3146,8 +3143,8 @@ std::string DGGraphImpl::resolveRelativePath(const std::string & baseFile, const
   if(baseFile.length() == 0)
     return text;
 
-  int lastSlashPos = baseFile.rfind('/');
-  int lastBackSlashPos = baseFile.rfind('\\');
+  size_t lastSlashPos = baseFile.rfind('/');
+  size_t lastBackSlashPos = baseFile.rfind('\\');
   if(lastSlashPos != std::string::npos && lastBackSlashPos != std::string::npos)
     lastSlashPos = lastSlashPos > lastBackSlashPos ? lastSlashPos : lastBackSlashPos;
 
@@ -3164,7 +3161,7 @@ std::string DGGraphImpl::resolveEnvironmentVariables(const std::string text)
   {
     if(text[i] == '$' && text[i+1] == '{')
     {
-      int closePos = text.find('}', i);
+      size_t closePos = text.find('}', i);
       if(closePos != std::string::npos)
       {
         std::string envVarName = text.substr(i+2, closePos - i - 2);

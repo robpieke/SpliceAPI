@@ -36,7 +36,7 @@ namespace FabricSpliceImpl
 
     // create the 
     static DGGraphImplPtr construct(const std::string & name, bool guarded = true, FabricCore::ClientOptimizationType optType = FabricCore::ClientOptimizationType_Synchronous);
-    ~DGGraphImpl();
+    virtual ~DGGraphImpl();
 
     /// empties the content of the node
     void clear(std::string * errorOut = NULL);

@@ -306,6 +306,10 @@ const char *  KLParserImpl::KLSymbol::typeNameFromType(Type index)
       return "pex2";
     case(Type_maxtypes):
       return "maxtypes";
+    case(Type_none):
+    case(Type_firstkeyword):
+    case(Type_lastkeyword):
+      return "None";
   }
   return "None";
 }
@@ -1173,7 +1177,7 @@ const char * KLParserImpl::getKLTypeForSymbol(const KLParserImpl::KLSymbol * s) 
         break;
     }
     std::string arrayType = getKLTypeForSymbol(s->prev());
-    int bracketPos = arrayType.find('[');
+    size_t bracketPos = arrayType.find('[');
     if(bracketPos != std::string::npos)
       arrayType = arrayType.substr(0, bracketPos);
 
@@ -1200,7 +1204,6 @@ const char * KLParserImpl::getKLTypeForSymbol(const KLParserImpl::KLSymbol * s) 
     const KLSymbol * funcName = s->prev();
     if(!funcName)
       return "";
-    const KLSymbol * func = NULL;
     if(funcName->prev())
     {
       if(funcName->prev()->type() == KLSymbol::Type_period)

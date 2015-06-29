@@ -12,7 +12,7 @@ namespace FabricSpliceImpl
   public:
 
     ObjectImpl() {}
-    ~ObjectImpl() {}
+    virtual ~ObjectImpl() {}
 
     virtual std::string getName() const { return mName; }
     virtual char const * getName_cstr() const { return mName.c_str(); }
