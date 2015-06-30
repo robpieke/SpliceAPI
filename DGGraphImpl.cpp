@@ -2352,7 +2352,7 @@ bool DGGraphImpl::memberPersistence(const std::string &name, const std::string &
   bool persistence = false;
   DGPortImplPtr port = getDGPort(name);
   if(port)
-    persistence = !port->isArray() && (port->isShallow() || port->getDataType() == "String") && !port->isObject() && !port->isInterface();    
+    persistence = !port->isArray() && (port->isShallow() || strcmp(port->getDataType(), "String") == 0) && !port->isObject() && !port->isInterface();    
   if(mMemberPersistenceOverrides.find(name) != mMemberPersistenceOverrides.end()){
     if(requiresStorage)
       *requiresStorage = persistence != (mMemberPersistenceOverrides[name] != 0);
