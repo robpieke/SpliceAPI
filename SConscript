@@ -36,7 +36,7 @@ if FABRIC_BUILD_OS == "Windows":
   spliceReleaseFlags = {
     'CCFLAGS': baseCPPFlags + ['/Ox', '/MT'],
     'CPPDEFINES': baseCPPDefines + ['NDEBUG'],
-    'LINKFLAGS': baseLinkFlags + ['/NDEBUG', '/NODEFAULTLIB:LIBCMTD'],
+    'LINKFLAGS': baseLinkFlags + ['/NODEFAULTLIB:LIBCMTD'],
   }
   if FABRIC_BUILD_ARCH.endswith('64'):
     baseCPPDefines.append( 'WIN64' )
