@@ -34,11 +34,17 @@ FabricServices::Persistence::RTValFromJSONDecoder sRTValDecoder;
 stringVector DGGraphImpl::sExtFolders;
 DGGraphImpl::GetOperatorSourceCodeFunc DGGraphImpl::sGetOperatorSourceCodeFunc = NULL;
 
-void klReportFunc(void *userdata, char const *reportData, uint32_t reportLength)
+void klReportFunc(
+  void *userdata,
+  FabricCore::ReportSource source,
+  FabricCore::ReportLevel level,
+  char const *reportData,
+  uint32_t reportLength
+  )
 {
   std::string message(reportData);
   LoggingFunc reportFunc = LoggingImpl::getKLReportFunc();
-  if(reportFunc == NULL)
+  if ( reportFunc == NULL )
     printf("%s\n", message.c_str());
   else
     (*reportFunc)(message.c_str(), message.length());
