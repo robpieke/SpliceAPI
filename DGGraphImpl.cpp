@@ -690,7 +690,7 @@ bool DGGraphImpl::evaluate(FabricCore::DGNode dgNode, std::string * errorOut)
 
   try
   {
-    dgNode.evaluate();
+    dgNode.evaluate_noLock();
     mEvalContext.callMethod("", "_clear", 0, 0);
   }
   catch(FabricCore::Exception e)
