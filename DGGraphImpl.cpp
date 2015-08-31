@@ -157,7 +157,7 @@ const FabricCore::Client * DGGraphImpl::constructClient(bool guarded, FabricCore
     loadExtension("Manipulation");
     loadExtension("FileIO");
     loadExtension("Util");
-    loadExtension("SpliceInterfaces");
+    loadExtension("FabricInterfaces");
 
     // define the singletons scope
     sDrawingScope = FabricCore::RTVal::Create(*sClient, "InlineDrawingScope", 0, 0);
