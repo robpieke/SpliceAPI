@@ -212,6 +212,9 @@ if FABRIC_BUILD_OS == 'Darwin':
 if FABRIC_BUILD_OS == 'Linux':
   exportsFile = env.File('Linux.exports').srcnode()
   sharedEnv.Append(SHLINKFLAGS = ['-Wl,--version-script='+str(exportsFile)])
+elif FABRIC_BUILD_OS == 'Darwin':
+  exportsFile = env.File('Darwin.exports').srcnode()
+  sharedEnv.Append(SHLINKFLAGS = ['-Wl,-exported_symbols_list', str(exportsFile)])
 
 sharedLibrary = sharedEnv.SharedLibrary(
   sharedEnv.File(sharedLibName),
