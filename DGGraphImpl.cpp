@@ -2427,7 +2427,7 @@ void DGGraphImpl::getDGPortInfo(FabricCore::Variant & portInfo, FabricCore::RTVa
 
       if(persistenceContextRT.isValid())
       {
-        FabricCore::RTVal rtVal = it->second->getRTVal();
+        FabricCore::RTVal rtVal = it->second->getRTVal( FabricSplice::LockType_Context );
         if(rtVal.isValid())
         {
           if(rtVal.isObject())

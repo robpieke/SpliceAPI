@@ -67,11 +67,11 @@ DGPortImpl::DGPortImpl(
   if(!mIsArray && isObject() && doesAutoInitObjects()) {
     try
     {
-      FabricCore::RTVal rt = getRTVal();
+      FabricCore::RTVal rt = getRTVal( FabricCore::LockType_Context );
       if(rt.isNullObject())
       {
         rt = FabricCore::RTVal::Create(*client, mDataType.c_str(), 0, 0);
-        setRTVal(rt);
+        setRTVal( FabricCore::LockType_Context, rt );
         LoggingImpl::log(("DGPort '"+getName()+"' on Node '"+mGraphName+"' initiated "+mDataType+" reference.").c_str());
       }
     }
@@ -245,7 +245,12 @@ FabricCore::Variant DGPortImpl::getDefault(std::string * errorOut)
   return result;
 }
 
-FabricCore::RTVal DGPortImpl::getRTVal(bool evaluate, uint32_t slice, std::string * errorOut)
+FabricCore::RTVal DGPortImpl::getRTVal(
+  FabricCore::LockType lockType,
+  bool evaluate,
+  uint32_t slice,
+  std::string * errorOut
+  )
 {
   if(slice > getSliceCount())
   {
@@ -265,7 +270,8 @@ FabricCore::RTVal DGPortImpl::getRTVal(bool evaluate, uint32_t slice, std::strin
 
   try
   {
-    FabricCore::RTVal result = mDGNode.getMemberSliceValue(mMember.c_str(), slice);
+    FabricCore::RTVal result =
+      mDGNode.getMemberSliceValue_lockType(lockType, mMember.c_str(), slice);
     return result;
   }
   catch(FabricCore::Exception e)
@@ -275,7 +281,12 @@ FabricCore::RTVal DGPortImpl::getRTVal(bool evaluate, uint32_t slice, std::strin
   return FabricCore::RTVal();
 }
 
-bool DGPortImpl::setRTVal(FabricCore::RTVal value, uint32_t slice, std::string * errorOut)
+bool DGPortImpl::setRTVal(
+  FabricCore::LockType lockType,
+  FabricCore::RTVal value,
+  uint32_t slice,
+  std::string * errorOut
+  )
 {
   // if(mMode == Mode_OUT)
   //   return LoggingImpl::reportError("Cannot set data on an output DGPort.", errorOut);
@@ -284,7 +295,7 @@ bool DGPortImpl::setRTVal(FabricCore::RTVal value, uint32_t slice, std::string *
 
   try
   {
-    mDGNode.setMemberSliceValue(mMember.c_str(), slice, value);
+    mDGNode.setMemberSliceValue_lockType(lockType, mMember.c_str(), slice, value);
   }
   catch(FabricCore::Exception e)
   {
@@ -333,7 +344,13 @@ uint32_t DGPortImpl::getArrayCount(uint32_t slice, std::string * errorOut)
   return 0;
 }
 
-bool DGPortImpl::getArrayData(void * buffer, uint32_t bufferSize, uint32_t slice, std::string * errorOut)
+bool DGPortImpl::getArrayData(
+  FabricCore::LockType lockType,
+  void * buffer,
+  uint32_t bufferSize,
+  uint32_t slice,
+  std::string * errorOut
+  )
 {
   if(mMode == Mode_IN)
     return LoggingImpl::reportError("Cannot get data on an input DGPort.", errorOut);
@@ -354,7 +371,7 @@ bool DGPortImpl::getArrayData(void * buffer, uint32_t bufferSize, uint32_t slice
   uint32_t count = 0;
   try
   {
-    count = mDGNode.getMemberSliceArraySize(mMember.c_str(), slice);
+    count = mDGNode.getMemberSliceArraySize_lockType(lockType, mMember.c_str(), slice);
   }
   catch(FabricCore::Exception e)
   {
@@ -369,7 +386,7 @@ bool DGPortImpl::getArrayData(void * buffer, uint32_t bufferSize, uint32_t slice
 
   try
   {
-    mDGNode.getMemberSliceArrayData(mMember.c_str(), slice, bufferSize, buffer);
+    mDGNode.getMemberSliceArrayData_lockType(lockType, mMember.c_str(), slice, bufferSize, buffer);
   }
   catch(FabricCore::Exception e)
   {
@@ -379,7 +396,13 @@ bool DGPortImpl::getArrayData(void * buffer, uint32_t bufferSize, uint32_t slice
   return true;
 }
 
-bool DGPortImpl::setArrayData(void * buffer, uint32_t bufferSize, uint32_t slice, std::string * errorOut)
+bool DGPortImpl::setArrayData(
+  FabricCore::LockType lockType,
+  void * buffer,
+  uint32_t bufferSize,
+  uint32_t slice,
+  std::string * errorOut
+  )
 {
   if(mMode == Mode_OUT)
     return LoggingImpl::reportError("Cannot set data on an output DGPort.", errorOut);
@@ -398,9 +421,10 @@ bool DGPortImpl::setArrayData(void * buffer, uint32_t bufferSize, uint32_t slice
 
   try
   {
-    mDGNode.setMemberSliceArraySize(mMember.c_str(), slice, bufferCount);
+    if ( mDGNode.getMemberSliceArraySize_lockType( lockType, mMember.c_str(), slice ) != bufferCount )
+      mDGNode.setMemberSliceArraySize( mMember.c_str(), slice, bufferCount );
     if(bufferCount >  0)
-      mDGNode.setMemberSliceArrayData(mMember.c_str(), slice, bufferSize, buffer);
+      mDGNode.setMemberSliceArrayData_lockType(lockType, mMember.c_str(), slice, bufferSize, buffer);
   }
   catch(FabricCore::Exception e)
   {
@@ -533,7 +557,9 @@ bool DGPortImpl::copyArrayDataFromDGPort(DGPortImplPtr other, uint32_t slice, ui
     buffer = malloc(bufferSize);
     try
     {
-      other->mDGNode.getMemberSliceArrayData(other->mMember.c_str(), otherSlice, bufferSize, buffer);
+      other->mDGNode.getMemberSliceArrayData_lockType(
+        FabricCore::LockType_Context, other->mMember.c_str(), otherSlice, bufferSize, buffer
+        );
     }
     catch(FabricCore::Exception e)
     {

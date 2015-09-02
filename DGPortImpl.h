@@ -18,6 +18,12 @@ namespace FabricSpliceImpl
     
   public:
 
+    enum Lock
+    {
+        Lock_Perform,
+        Lock_Omit
+    };
+
     enum Mode
     {
       Mode_IN,
@@ -113,10 +119,20 @@ namespace FabricSpliceImpl
     */
 
     /// returns the value of a specific slice of this DGPort as a FabricCore::RTVal
-    FabricCore::RTVal getRTVal(bool evaluate = false, uint32_t slice = 0, std::string * errorOut = NULL);
+    FabricCore::RTVal getRTVal(
+        FabricCore::LockType lockType,
+        bool evaluate = false,
+        uint32_t slice = 0,
+        std::string * errorOut = NULL
+        );
 
     /// sets the value of a specific slice of this DGPort from a FabricCore::RTVal
-    bool setRTVal(FabricCore::RTVal value, uint32_t slice = 0, std::string * errorOut = NULL);
+    bool setRTVal(
+        FabricCore::LockType lockType,
+        FabricCore::RTVal value,
+        uint32_t slice = 0,
+        std::string * errorOut = NULL
+        );
 
     /*
       High Performance IO
@@ -130,12 +146,24 @@ namespace FabricSpliceImpl
     /// returns the void* array data of this DGPort.
     /// this only works for array DGPorts (isArray() == true)
     /// the bufferSize has to match getArrayCount() * getDataSize()
-    bool getArrayData(void * buffer, uint32_t bufferSize, uint32_t slice = 0, std::string * errorOut = NULL);
+    bool getArrayData(
+        FabricCore::LockType lockType,
+        void * buffer,
+        uint32_t bufferSize,
+        uint32_t slice = 0,
+        std::string * errorOut = NULL
+        );
 
     /// sets the void* array data of this DGPort.
     /// this only works for array DGPorts (isArray() == true)
     /// this also sets the array count determined by bufferSize / getDataSize()
-    bool setArrayData(void * buffer, uint32_t bufferSize, uint32_t slice = 0, std::string * errorOut = NULL);
+    bool setArrayData(
+        FabricCore::LockType lockType,
+        void * buffer,
+        uint32_t bufferSize,
+        uint32_t slice = 0,
+        std::string * errorOut = NULL
+        );
 
     /// gets the void* slice array data of this DGPort.
     /// this only works for non-array DGPorts (isArray() == false)
@@ -169,7 +197,6 @@ namespace FabricSpliceImpl
 
     // gets a dictionary of all options
     FabricCore::Variant getAllOptions();
-
 
   private:
     DGPortImpl(DGGraphImplPtr thisGraph, const std::string & name, const std::string & member, FabricCore::DGNode dgNode, const std::string & dgNodeName, Mode mode, uint32_t dataSize, bool shallow, bool autoInitObjects);

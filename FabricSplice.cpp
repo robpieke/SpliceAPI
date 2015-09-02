@@ -2165,19 +2165,30 @@ void FECS_DGPort_getDefault(FECS_DGPortRef ref, FabricCore::Variant & result)
   FECS_CATCH_VOID
 }
 
-void FECS_DGPort_getRTVal(FECS_DGPortRef ref, bool evaluate, unsigned int slice, FabricCore::RTVal & result)
+void FECS_DGPort_getRTVal(
+  FECS_LockType lockType,
+  FECS_DGPortRef ref,
+  bool evaluate,
+  unsigned int slice,
+  FabricCore::RTVal & result
+  )
 {
   FECS_TRY_CLEARERROR
   GETSMARTPTRVOID(DGPortImplPtr, port)
-  result = port->getRTVal(evaluate, slice);
+  result = port->getRTVal(lockType, evaluate, slice);
   FECS_CATCH_VOID
 }
 
-bool FECS_DGPort_setRTVal(FECS_DGPortRef ref, const FabricCore::RTVal & value, unsigned int slice)
+bool FECS_DGPort_setRTVal(
+  FECS_LockType lockType,
+  FECS_DGPortRef ref,
+  const FabricCore::RTVal & value,
+  unsigned int slice
+  )
 {
   FECS_TRY_CLEARERROR
   GETSMARTPTR(DGPortImplPtr, port, false)
-  return port->setRTVal(value, slice);
+  return port->setRTVal(lockType, value, slice);
   FECS_CATCH(false);
 }
 
@@ -2189,19 +2200,31 @@ unsigned int FECS_DGPort_getArrayCount(FECS_DGPortRef ref, unsigned int slice)
   FECS_CATCH(0);
 }
 
-bool FECS_DGPort_getArrayData(FECS_DGPortRef ref, void * buffer, unsigned int bufferSize, unsigned int slice)
+bool FECS_DGPort_getArrayData(
+  FECS_LockType lockType,
+  FECS_DGPortRef ref,
+  void * buffer,
+  unsigned int bufferSize,
+  unsigned int slice
+  )
 {
   FECS_TRY_CLEARERROR
   GETSMARTPTR(DGPortImplPtr, port, false)
-  return port->getArrayData(buffer, bufferSize, slice);
+  return port->getArrayData(lockType, buffer, bufferSize, slice);
   FECS_CATCH(false);
 }
 
-bool FECS_DGPort_setArrayData(FECS_DGPortRef ref, void * buffer, unsigned int bufferSize, unsigned int slice)
+bool FECS_DGPort_setArrayData(
+  FECS_LockType lockType,
+  FECS_DGPortRef ref,
+  void * buffer,
+  unsigned int bufferSize,
+  unsigned int slice
+  )
 {
   FECS_TRY_CLEARERROR
   GETSMARTPTR(DGPortImplPtr, port, false)
-  return port->setArrayData(buffer, bufferSize, slice);
+  return port->setArrayData(lockType, buffer, bufferSize, slice);
   FECS_CATCH(false);
 }
 
