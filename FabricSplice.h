@@ -3803,20 +3803,36 @@ namespace FabricSplice
     }
 
     // returns the value of a specific slice of this DGPort as a FabricCore::RTVal
-    FabricCore::RTVal getRTVal(LockType lockType, bool evaluate = false, uint32_t slice = 0)
+    FabricCore::RTVal getRTVal_lockType(LockType lockType, bool evaluate = false, uint32_t slice = 0)
     {
       FabricCore::RTVal result;
       FECS_DGPort_getRTVal(lockType, mRef, evaluate, slice, result);
       Exception::MaybeThrow();
       return result;
     }
+    FabricCore::RTVal getRTVal(bool evaluate = false, uint32_t slice = 0)
+    {
+      return getRTVal_lockType(
+        FabricCore::LockType_Context,
+        evaluate,
+        slice
+        );
+    }
 
     // sets the value of a specific slice of this DGPort from a FabricCore::RTVal
-    bool setRTVal(LockType lockType, FabricCore::RTVal value, uint32_t slice = 0)
+    bool setRTVal_lockType(LockType lockType, FabricCore::RTVal value, uint32_t slice = 0)
     {
       bool result = FECS_DGPort_setRTVal(lockType, mRef, value, slice);
       Exception::MaybeThrow();
       return result;
+    }
+    bool setRTVal(FabricCore::RTVal value, uint32_t slice = 0)
+    {
+      return setRTVal_lockType(
+        FabricCore::LockType_Context,
+        value,
+        slice
+        );
     }
 
     // returns the value of a specific slice of this DGPort as a JSON string
@@ -3865,7 +3881,7 @@ namespace FabricSplice
     // returns the void* array data of this DGPort.
     // this only works for array Ports (isArray() == true)
     // the bufferSize has to match getArrayCount() * getDataSize()
-    bool getArrayData(
+    bool getArrayData_lockType(
       LockType lockType,
       void * buffer,
       unsigned int bufferSize,
@@ -3876,15 +3892,37 @@ namespace FabricSplice
       Exception::MaybeThrow();
       return result;
     }
+    bool getArrayData(
+      void * buffer,
+      unsigned int bufferSize,
+      unsigned int slice = 0
+      )
+    {
+      return getArrayData_lockType(
+        FabricCore::LockType_Context,
+        buffer,
+        bufferSize,
+        slice
+        );
+    }
 
     // sets the void* array data of this DGPort.
     // this only works for array Ports (isArray() == true)
     // this also sets the array count determined by bufferSize / getDataSize()
-    bool setArrayData(LockType lockType, void * buffer, unsigned int bufferSize, unsigned int slice = 0)
+    bool setArrayData_lockType(LockType lockType, void * buffer, unsigned int bufferSize, unsigned int slice = 0)
     {
       bool result = FECS_DGPort_setArrayData(lockType, mRef, buffer, bufferSize, slice);
       Exception::MaybeThrow();
       return result;
+    }
+    bool setArrayData(void * buffer, unsigned int bufferSize, unsigned int slice = 0)
+    {
+      return setArrayData_lockType(
+        FabricCore::LockType_Context,
+        buffer,
+        bufferSize,
+        slice
+        );
     }
 
     // gets the void* slice array data of this DGPort.

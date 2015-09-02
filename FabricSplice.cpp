@@ -2175,7 +2175,7 @@ void FECS_DGPort_getRTVal(
 {
   FECS_TRY_CLEARERROR
   GETSMARTPTRVOID(DGPortImplPtr, port)
-  result = port->getRTVal(lockType, evaluate, slice);
+  result = port->getRTVal_lockType(lockType, evaluate, slice);
   FECS_CATCH_VOID
 }
 
@@ -2188,7 +2188,7 @@ bool FECS_DGPort_setRTVal(
 {
   FECS_TRY_CLEARERROR
   GETSMARTPTR(DGPortImplPtr, port, false)
-  return port->setRTVal(lockType, value, slice);
+  return port->setRTVal_lockType(lockType, value, slice);
   FECS_CATCH(false);
 }
 
@@ -2210,7 +2210,7 @@ bool FECS_DGPort_getArrayData(
 {
   FECS_TRY_CLEARERROR
   GETSMARTPTR(DGPortImplPtr, port, false)
-  return port->getArrayData(lockType, buffer, bufferSize, slice);
+  return port->getArrayData_lockType(lockType, buffer, bufferSize, slice);
   FECS_CATCH(false);
 }
 
@@ -2224,7 +2224,7 @@ bool FECS_DGPort_setArrayData(
 {
   FECS_TRY_CLEARERROR
   GETSMARTPTR(DGPortImplPtr, port, false)
-  return port->setArrayData(lockType, buffer, bufferSize, slice);
+  return port->setArrayData_lockType(lockType, buffer, bufferSize, slice);
   FECS_CATCH(false);
 }
 

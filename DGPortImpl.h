@@ -119,20 +119,46 @@ namespace FabricSpliceImpl
     */
 
     /// returns the value of a specific slice of this DGPort as a FabricCore::RTVal
-    FabricCore::RTVal getRTVal(
+    FabricCore::RTVal getRTVal_lockType(
         FabricCore::LockType lockType,
         bool evaluate = false,
         uint32_t slice = 0,
         std::string * errorOut = NULL
         );
+    FabricCore::RTVal getRTVal(
+        bool evaluate = false,
+        uint32_t slice = 0,
+        std::string * errorOut = NULL
+        )
+    {
+        return getRTVal_lockType(
+            FabricCore::LockType_Context,
+            evaluate,
+            slice,
+            errorOut
+            );
+    }
 
     /// sets the value of a specific slice of this DGPort from a FabricCore::RTVal
-    bool setRTVal(
+    bool setRTVal_lockType(
         FabricCore::LockType lockType,
         FabricCore::RTVal value,
         uint32_t slice = 0,
         std::string * errorOut = NULL
         );
+    bool setRTVal(
+        FabricCore::RTVal value,
+        uint32_t slice = 0,
+        std::string * errorOut = NULL
+        )
+    {
+        return setRTVal_lockType(
+            FabricCore::LockType_Context,
+            value,
+            slice,
+            errorOut
+            );
+    }
 
     /*
       High Performance IO
@@ -146,24 +172,54 @@ namespace FabricSpliceImpl
     /// returns the void* array data of this DGPort.
     /// this only works for array DGPorts (isArray() == true)
     /// the bufferSize has to match getArrayCount() * getDataSize()
-    bool getArrayData(
+    bool getArrayData_lockType(
         FabricCore::LockType lockType,
         void * buffer,
         uint32_t bufferSize,
         uint32_t slice = 0,
         std::string * errorOut = NULL
         );
+    bool getArrayData(
+        void * buffer,
+        uint32_t bufferSize,
+        uint32_t slice = 0,
+        std::string * errorOut = NULL
+        )
+    {
+        return getArrayData_lockType(
+            FabricCore::LockType_Context,
+            buffer,
+            bufferSize,
+            slice,
+            errorOut
+            );
+    }
 
     /// sets the void* array data of this DGPort.
     /// this only works for array DGPorts (isArray() == true)
     /// this also sets the array count determined by bufferSize / getDataSize()
-    bool setArrayData(
+    bool setArrayData_lockType(
         FabricCore::LockType lockType,
         void * buffer,
         uint32_t bufferSize,
         uint32_t slice = 0,
         std::string * errorOut = NULL
         );
+    bool setArrayData(
+        void * buffer,
+        uint32_t bufferSize,
+        uint32_t slice = 0,
+        std::string * errorOut = NULL
+        )
+    {
+        return setArrayData_lockType(
+            FabricCore::LockType_Context,
+            buffer,
+            bufferSize,
+            slice,
+            errorOut
+            );
+    }
 
     /// gets the void* slice array data of this DGPort.
     /// this only works for non-array DGPorts (isArray() == false)

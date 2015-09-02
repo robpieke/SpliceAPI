@@ -67,11 +67,11 @@ DGPortImpl::DGPortImpl(
   if(!mIsArray && isObject() && doesAutoInitObjects()) {
     try
     {
-      FabricCore::RTVal rt = getRTVal( FabricCore::LockType_Context );
+      FabricCore::RTVal rt = getRTVal();
       if(rt.isNullObject())
       {
         rt = FabricCore::RTVal::Create(*client, mDataType.c_str(), 0, 0);
-        setRTVal( FabricCore::LockType_Context, rt );
+        setRTVal( rt );
         LoggingImpl::log(("DGPort '"+getName()+"' on Node '"+mGraphName+"' initiated "+mDataType+" reference.").c_str());
       }
     }
@@ -245,7 +245,7 @@ FabricCore::Variant DGPortImpl::getDefault(std::string * errorOut)
   return result;
 }
 
-FabricCore::RTVal DGPortImpl::getRTVal(
+FabricCore::RTVal DGPortImpl::getRTVal_lockType(
   FabricCore::LockType lockType,
   bool evaluate,
   uint32_t slice,
@@ -281,7 +281,7 @@ FabricCore::RTVal DGPortImpl::getRTVal(
   return FabricCore::RTVal();
 }
 
-bool DGPortImpl::setRTVal(
+bool DGPortImpl::setRTVal_lockType(
   FabricCore::LockType lockType,
   FabricCore::RTVal value,
   uint32_t slice,
@@ -344,7 +344,7 @@ uint32_t DGPortImpl::getArrayCount(uint32_t slice, std::string * errorOut)
   return 0;
 }
 
-bool DGPortImpl::getArrayData(
+bool DGPortImpl::getArrayData_lockType(
   FabricCore::LockType lockType,
   void * buffer,
   uint32_t bufferSize,
@@ -396,7 +396,7 @@ bool DGPortImpl::getArrayData(
   return true;
 }
 
-bool DGPortImpl::setArrayData(
+bool DGPortImpl::setArrayData_lockType(
   FabricCore::LockType lockType,
   void * buffer,
   uint32_t bufferSize,
