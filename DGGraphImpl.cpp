@@ -220,7 +220,7 @@ DGGraphImpl::DGGraphImpl(
   // construct this graph's evaluation context
   mEvalContext = FabricCore::RTVal::Create(*sClient, "EvalContext", 0, 0);
 
-  LoggingImpl::log("DGGraph '"+getName()+"' created.");
+  // LoggingImpl::log("DGGraph '"+getName()+"' created.");
 }
 
 DGGraphImplPtr DGGraphImpl::construct(const std::string & name, bool guarded, FabricCore::ClientOptimizationType optType)
@@ -231,7 +231,7 @@ DGGraphImplPtr DGGraphImpl::construct(const std::string & name, bool guarded, Fa
 DGGraphImpl::~DGGraphImpl()
 {
   clear();
-  LoggingImpl::log("DGGraph '"+getName()+"' destroyed.");
+  // LoggingImpl::log("DGGraph '"+getName()+"' destroyed.");
 
   sInstanceCount--;
 
@@ -284,7 +284,7 @@ void DGGraphImpl::clear(std::string * errorOut)
   for(DGNodeIt nodeIt = mDGNodes.begin(); nodeIt != mDGNodes.end(); nodeIt++)
   {
     nodeIt->second.node.destroy();
-    LoggingImpl::log("DGGraph '"+getName()+"' removed DGNode '"+nodeIt->first+"'.");
+    // LoggingImpl::log("DGGraph '"+getName()+"' removed DGNode '"+nodeIt->first+"'.");
   }
 
   mDGNodes.clear();
@@ -595,7 +595,7 @@ bool DGGraphImpl::constructDGNode(const std::string & name, std::string * errorO
   requireDGCheck();
   requireEvaluate();
 
-  LoggingImpl::log("DGGraph '"+getName()+"' constructed new DGNode '"+dgNodeName+"'.");
+  // LoggingImpl::log("DGGraph '"+getName()+"' constructed new DGNode '"+dgNodeName+"'.");
 
   return true;
 }
@@ -966,7 +966,7 @@ DGPortImplPtr DGGraphImpl::addDGPort(
   DGPortImplPtr portPtr(port);
   mDGPorts.insert(DGPortPair(name, portPtr));
 
-  LoggingImpl::log("DGGraph '"+getName()+"' constructed new DGPort '"+name+"'.");
+  // LoggingImpl::log("DGGraph '"+getName()+"' constructed new DGPort '"+name+"'.");
 
   validateAllKLOperators(errorOut);
   requireEvaluate();
@@ -999,7 +999,7 @@ bool DGGraphImpl::removeDGPort(const std::string & name, std::string * errorOut)
           FabricCore::DGBindingList bindings = node.getBindingList();
           FabricCore::DGBinding binding = bindings.getBinding(data.index);
           FabricCore::DGOperator op = binding.getOperator();
-          LoggingImpl::log(std::string("KLOperator '")+op.getName()+"' on DGNode '"+data.dgNode+"' invalidated.");
+          // LoggingImpl::log(std::string("KLOperator '")+op.getName()+"' on DGNode '"+data.dgNode+"' invalidated.");
         }
       }
     }
@@ -1007,7 +1007,7 @@ bool DGGraphImpl::removeDGPort(const std::string & name, std::string * errorOut)
 
   mDGPorts.erase(it);
 
-  LoggingImpl::log("DGGraph '"+getName()+"' removed DGPort '"+name+"'.");
+  // LoggingImpl::log("DGGraph '"+getName()+"' removed DGPort '"+name+"'.");
   requireEvaluate();
   return true;
 }
@@ -1097,7 +1097,7 @@ bool DGGraphImpl::setDGNodeDependency(const std::string & dgNode, const std::str
     return LoggingImpl::reportError(e.getDesc_cstr(), errorOut);
   }
 
-  LoggingImpl::log("DGGraph '"+getName()+"' constructed new DGNodeDependency '"+dgNode+"-->"+dependency+"'.");
+  // LoggingImpl::log("DGGraph '"+getName()+"' constructed new DGNodeDependency '"+dgNode+"-->"+dependency+"'.");
 
   return true;
 }
@@ -1137,7 +1137,7 @@ bool DGGraphImpl::removeDGNodeDependency(const std::string & dgNode, const std::
     FabricCore::DGBinding binding = bindings.getBinding(bindingsToRemove[j]);
     FabricCore::DGOperator op = binding.getOperator();
     std::string opName = op.getName();
-    LoggingImpl::log("DGGraph '"+getName()+"' removed operator '"+opName+"'.");
+    // LoggingImpl::log("DGGraph '"+getName()+"' removed operator '"+opName+"'.");
     bindings.remove(bindingsToRemove[j]);
   }
 
@@ -1150,7 +1150,7 @@ bool DGGraphImpl::removeDGNodeDependency(const std::string & dgNode, const std::
     return LoggingImpl::reportError(e.getDesc_cstr(), errorOut);
   }
 
-  LoggingImpl::log("DGGraph '"+getName()+"' removed DGNodeDependency '"+dgNode+"-->"+dependency+"'.");
+  // LoggingImpl::log("DGGraph '"+getName()+"' removed DGNodeDependency '"+dgNode+"-->"+dependency+"'.");
 
   return true;
 }
@@ -1456,7 +1456,7 @@ bool DGGraphImpl::constructKLOperator(
   try
   {
     op = FabricCore::DGOperator(*sClient, opName.c_str(), (opName+".kl").c_str(), tempCode.c_str(), entryFunction.c_str());
-    LoggingImpl::log("DGGraph '"+getName()+"' constructed new KL Operator '"+name+"'.");
+    // LoggingImpl::log("DGGraph '"+getName()+"' constructed new KL Operator '"+name+"'.");
   }
   catch(FabricCore::Exception e)
   {
@@ -1484,7 +1484,7 @@ bool DGGraphImpl::constructKLOperator(
     return LoggingImpl::reportError(e.getDesc_cstr(), errorOut);
   }
 
-  LoggingImpl::log("DGGraph '"+getName()+"' bound new KL Operator '"+name+"'.");
+  // LoggingImpl::log("DGGraph '"+getName()+"' bound new KL Operator '"+name+"'.");
 
   FabricCore::Variant portMapClone = FabricCore::Variant::CreateFromJSON(opPortMap.getJSONEncoding().getStringData());
   mDGNodes.find(dgNodeName)->second.opPortMaps.push_back(portMapClone);
@@ -1581,7 +1581,7 @@ bool DGGraphImpl::removeKLOperator(const std::string & name, const std::string &
         sDGOperatorSuffix.erase(suffixIt);
       }
     }
-    LoggingImpl::log("DGGraph '"+getName()+"' removed KL Operator '"+name+"'.");
+    // LoggingImpl::log("DGGraph '"+getName()+"' removed KL Operator '"+name+"'.");
   }
 
   return result;
@@ -1618,7 +1618,7 @@ bool DGGraphImpl::setKLOperatorEntry(const std::string & name, const std::string
   opIt->second.entry = entry;
   op.setEntryPoint(entry.c_str());
 
-  LoggingImpl::log("KL Operator '"+name+"' entry updated.");
+  // LoggingImpl::log("KL Operator '"+name+"' entry updated.");
 
   requireDGCheck();
   return checkErrors(errorOut);
@@ -1711,7 +1711,7 @@ bool DGGraphImpl::setKLOperatorIndex(const std::string & name, unsigned int inde
 
   mBindings = newBindings;
 
-  LoggingImpl::log("KL Operator '"+name+"' moved.");
+  // LoggingImpl::log("KL Operator '"+name+"' moved.");
   return checkErrors(errorOut);
 }
 
@@ -1858,7 +1858,7 @@ bool DGGraphImpl::setKLOperatorSourceCode(
   if(!validateKLOperator(opName, !justCreated, errorOut))
     return false;
 
-  LoggingImpl::log("KL Operator '"+name+"' sourcecode updated.");
+  // LoggingImpl::log("KL Operator '"+name+"' sourcecode updated.");
   LoggingImpl::clearError();
 
   requireDGCheck();
@@ -2213,7 +2213,7 @@ bool DGGraphImpl::validateKLOperator(const std::string & opName, bool logValidat
       sAllDGGraphs[i]->requireEvaluate();
       data.valid = true;
 
-      LoggingImpl::log(std::string("KLOperator '")+op.getName()+"' on DGNode '"+data.dgNode+"' validated.");
+      // LoggingImpl::log(std::string("KLOperator '")+op.getName()+"' on DGNode '"+data.dgNode+"' validated.");
     }
   }
   return true;
@@ -3036,7 +3036,7 @@ bool DGGraphImpl::saveToFile(const std::string & filePath, const PersistenceInfo
 
   fclose(file);
 
-  LoggingImpl::log("Saved graph '"+getName()+"' to "+filePath);
+  // LoggingImpl::log("Saved graph '"+getName()+"' to "+filePath);
   return true;
 }
 
@@ -3086,7 +3086,7 @@ bool DGGraphImpl::loadFromFile(
 
   if(!setFromPersistenceDataJSON(thisGraph, json, info, resolvedFilePath.c_str(), errorOut))
     return false;
-  LoggingImpl::log("Loaded graph '"+getName()+"' from "+filePath);
+  // LoggingImpl::log("Loaded graph '"+getName()+"' from "+filePath);
 
   return true;
 }
@@ -3209,11 +3209,11 @@ FILE* DGGraphImpl::findFileInSearchPath(std::string& resolvedFilePath)
     {
       std::string path = resolveEnvironmentVariables(paths[i]);
       resolvedFilePath = FTL::PathJoin(path, userPath);
-      LoggingImpl::log(("Testing filepath: "+resolvedFilePath).c_str());
+      // LoggingImpl::log(("Testing filepath: "+resolvedFilePath).c_str());
       file = fopen(resolvedFilePath.c_str(), "rb");
       if(file)
       {
-        LoggingImpl::log(("Resolved to filepath: "+resolvedFilePath).c_str());
+        // LoggingImpl::log(("Resolved to filepath: "+resolvedFilePath).c_str());
         break;
       }
     }
