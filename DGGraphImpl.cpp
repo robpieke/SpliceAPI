@@ -2647,6 +2647,11 @@ bool DGGraphImpl::setFromPersistenceDataDict(
   if(mMetaData.length() > 0)
     dataVar.setDictValue("metaData", FabricCore::Variant::CreateString(mMetaData.c_str()));
 
+  FabricCore::Variant const *evaluateSharedVar =
+    dataVar.getDictValue("evaluateShared");
+  if ( evaluateSharedVar && evaluateSharedVar->isBoolean() )
+    mEvaluateShared = evaluateSharedVar->getBoolean();
+
   // check if this is a referenced splice file
   const FabricCore::Variant * spliceFilePathVar = dataVar.getDictValue("spliceFilePath");
   if(spliceFilePathVar)
