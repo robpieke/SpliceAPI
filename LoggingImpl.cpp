@@ -60,10 +60,23 @@ void LoggingImpl::setSlowOperationFunc(SlowOperationFunc func)
 
 void LoggingImpl::log(const std::string & message) 
 {
-  if(sLogFunc)
-    (*sLogFunc)(message.c_str(), message.length());
-  else
-    printf("%s\n", message.c_str());
+  static bool haveEnabled = false;
+  static bool enabled;
+  if ( !haveEnabled )
+  {
+    haveEnabled = true;
+    char const *envvar = getenv( "FABRIC_SPLICE_DISABLE_LOG" );
+    bool disabled = envvar && atoi( envvar ) >= 1;
+    enabled = !disabled;
+  }
+
+  if ( enabled )
+  {
+    if(sLogFunc)
+      (*sLogFunc)(message.c_str(), message.length());
+    else
+      printf("%s\n", message.c_str());
+  }
 }
 
 void LoggingImpl::logError(const std::string & message) 
