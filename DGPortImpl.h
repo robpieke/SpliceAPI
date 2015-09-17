@@ -132,7 +132,7 @@ namespace FabricSpliceImpl
         )
     {
         return getRTVal_lockType(
-            FabricCore::LockType_Context,
+            FabricCore::LockType_Shared,
             evaluate,
             slice,
             errorOut
@@ -153,7 +153,7 @@ namespace FabricSpliceImpl
         )
     {
         return setRTVal_lockType(
-            FabricCore::LockType_Context,
+            FabricCore::LockType_Shared,
             value,
             slice,
             errorOut
@@ -187,7 +187,7 @@ namespace FabricSpliceImpl
         )
     {
         return getArrayData_lockType(
-            FabricCore::LockType_Context,
+            FabricCore::LockType_Shared,
             buffer,
             bufferSize,
             slice,
@@ -213,7 +213,7 @@ namespace FabricSpliceImpl
         )
     {
         return setArrayData_lockType(
-            FabricCore::LockType_Context,
+            FabricCore::LockType_Shared,
             buffer,
             bufferSize,
             slice,

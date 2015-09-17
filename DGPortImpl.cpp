@@ -558,7 +558,7 @@ bool DGPortImpl::copyArrayDataFromDGPort(DGPortImplPtr other, uint32_t slice, ui
     try
     {
       other->mDGNode.getMemberSliceArrayData_lockType(
-        FabricCore::LockType_Context, other->mMember.c_str(), otherSlice, bufferSize, buffer
+        FabricCore::LockType_Shared, other->mMember.c_str(), otherSlice, bufferSize, buffer
         );
     }
     catch(FabricCore::Exception e)

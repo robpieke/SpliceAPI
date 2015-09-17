@@ -1751,8 +1751,8 @@ enum FECS_DGPort_Mode
 };
 
 typedef FEC_LockType FECS_LockType;
-#define FECS_LockType_Context FEC_LockType_Context
-#define FECS_LockType_None FEC_LockType_None
+#define FECS_LockType_Shared FEC_LockType_Shared
+#define FECS_LockType_Exclusive FEC_LockType_Exclusive
 
 // C functions
 //=====================================================
@@ -2052,8 +2052,8 @@ namespace FabricSplice
   };
 
   typedef FECS_LockType LockType;
-  static const LockType LockType_Context = FEC_LockType_Context;
-  static const LockType LockType_None = FEC_LockType_None;
+  static const LockType LockType_Shared = FEC_LockType_Shared;
+  static const LockType LockType_Exclusive = FEC_LockType_Exclusive;
 
   class Exception
   {
@@ -3813,7 +3813,7 @@ namespace FabricSplice
     FabricCore::RTVal getRTVal(bool evaluate = false, uint32_t slice = 0)
     {
       return getRTVal_lockType(
-        FabricCore::LockType_Context,
+        FabricCore::LockType_Shared,
         evaluate,
         slice
         );
@@ -3829,7 +3829,7 @@ namespace FabricSplice
     bool setRTVal(FabricCore::RTVal value, uint32_t slice = 0)
     {
       return setRTVal_lockType(
-        FabricCore::LockType_Context,
+        FabricCore::LockType_Shared,
         value,
         slice
         );
@@ -3899,7 +3899,7 @@ namespace FabricSplice
       )
     {
       return getArrayData_lockType(
-        FabricCore::LockType_Context,
+        FabricCore::LockType_Shared,
         buffer,
         bufferSize,
         slice
@@ -3918,7 +3918,7 @@ namespace FabricSplice
     bool setArrayData(void * buffer, unsigned int bufferSize, unsigned int slice = 0)
     {
       return setArrayData_lockType(
-        FabricCore::LockType_Context,
+        FabricCore::LockType_Shared,
         buffer,
         bufferSize,
         slice
