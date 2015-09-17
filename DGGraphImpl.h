@@ -188,6 +188,10 @@ namespace FabricSpliceImpl
     /// checks all FabricCore::DGNodes and FabricCore::Operators for errors, return false if any errors found
     static bool checkErrors(std::string * errorOut = NULL);
 
+    /// set whether to evaluate using a shared lock
+    void setEvaluateShared( bool evaluateShared )
+        { mEvaluateShared = evaluateShared; }
+
     /// evaluates a provided FabricCore::DGNode
     bool evaluate(
         FabricCore::DGNode dgNode,

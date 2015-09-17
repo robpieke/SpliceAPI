@@ -1947,6 +1947,7 @@ FECS_DECL char const * FECS_DGGraph_getKLOperatorName(FECS_DGGraphRef ref, unsig
 FECS_DECL unsigned int FECS_DGGraph_getGlobalKLOperatorCount();
 FECS_DECL char const * FECS_DGGraph_getGlobalKLOperatorName(unsigned int index);
 FECS_DECL bool FECS_DGGraph_checkErrors();
+FECS_DECL void FECS_DGGraph_setEvaluateShared(FECS_DGGraphRef ref, bool evaluateShared);
 FECS_DECL bool FECS_DGGraph_evaluate(FECS_DGGraphRef ref);
 FECS_DECL bool FECS_DGGraph_clearEvaluate(FECS_DGGraphRef ref);
 FECS_DECL bool FECS_DGGraph_usesEvalContext(FECS_DGGraphRef ref);
@@ -4394,6 +4395,13 @@ namespace FabricSplice
       bool result = FECS_DGGraph_checkErrors();
       Exception::MaybeThrow();
       return result;
+    }
+
+    // whether to evaluate the node using a shared lock
+    void setEvaluateShared( bool evaluateShared )
+    {
+      FECS_DGGraph_setEvaluateShared(mRef, evaluateShared);
+      Exception::MaybeThrow();
     }
 
     // evaluates the contained DGNode

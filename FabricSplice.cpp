@@ -1762,6 +1762,14 @@ bool FECS_DGGraph_evaluate(FECS_DGGraphRef ref)
   FECS_CATCH(false);
 }
 
+void FECS_DGGraph_setEvaluateShared(FECS_DGGraphRef ref, bool evaluateShared)
+{
+  FECS_TRY_CLEARERROR
+  GETSMARTPTRVOID(DGGraphImplPtr, graph)
+  graph->setEvaluateShared(evaluateShared);
+  FECS_CATCH_VOID;
+}
+
 bool FECS_DGGraph_clearEvaluate(FECS_DGGraphRef ref)
 {
   FECS_TRY_CLEARERROR
