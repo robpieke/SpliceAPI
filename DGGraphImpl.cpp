@@ -673,7 +673,11 @@ char const * DGGraphImpl::getDGNodeName(unsigned int index)
   return it->first.c_str();
 }
 
-bool DGGraphImpl::evaluate(FabricCore::DGNode dgNode, std::string * errorOut)
+bool DGGraphImpl::evaluate(
+  FabricCore::LockType lockType,
+  FabricCore::DGNode dgNode,
+  std::string * errorOut
+  )
 {
   if(!mRequiresEval || mIsPersisting)
     return true;
@@ -690,7 +694,7 @@ bool DGGraphImpl::evaluate(FabricCore::DGNode dgNode, std::string * errorOut)
 
   try
   {
-    dgNode.evaluate_noLock();
+    dgNode.evaluate_lockType( lockType );
     mEvalContext.callMethod("", "_clear", 0, 0);
   }
   catch(FabricCore::Exception e)
@@ -702,14 +706,18 @@ bool DGGraphImpl::evaluate(FabricCore::DGNode dgNode, std::string * errorOut)
   return true;
 }
 
-bool DGGraphImpl::evaluate(const std::string & name, std::string * errorOut)
+bool DGGraphImpl::evaluate(
+  FabricCore::LockType lockType,
+  const std::string & name,
+  std::string * errorOut
+  )
 {
   // todo: for subgraphs here we need to probably evaluate the leaf 
   // output nodes
   FabricCore::DGNode dgNode = getDGNode(name);
   if(!dgNode.isValid())
     return LoggingImpl::reportError("DGNode '"+name+"' does not exist.", errorOut);
-  return evaluate(dgNode, errorOut);
+  return evaluate(lockType, dgNode, errorOut);
 }
 
 bool DGGraphImpl::clearEvaluate(std::string * errorOut)
@@ -2427,7 +2435,7 @@ void DGGraphImpl::getDGPortInfo(FabricCore::Variant & portInfo, FabricCore::RTVa
 
       if(persistenceContextRT.isValid())
       {
-        FabricCore::RTVal rtVal = it->second->getRTVal( FabricSplice::LockType_Shared );
+        FabricCore::RTVal rtVal = it->second->getRTVal();
         if(rtVal.isValid())
         {
           if(rtVal.isObject())

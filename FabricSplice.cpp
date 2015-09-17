@@ -1754,11 +1754,14 @@ bool FECS_DGGraph_checkErrors()
   FECS_CATCH(false);
 }
 
-bool FECS_DGGraph_evaluate(FECS_DGGraphRef ref)
+bool FECS_DGGraph_evaluate(
+  FECS_DGGraphRef ref,
+  FEC_LockType lockType
+  )
 {
   FECS_TRY_CLEARERROR
   GETSMARTPTR(DGGraphImplPtr, graph, false)
-  return graph->evaluate();
+  return graph->evaluate( lockType );
   FECS_CATCH(false);
 }
 
@@ -2166,7 +2169,6 @@ void FECS_DGPort_getDefault(FECS_DGPortRef ref, FabricCore::Variant & result)
 }
 
 void FECS_DGPort_getRTVal(
-  FECS_LockType lockType,
   FECS_DGPortRef ref,
   bool evaluate,
   unsigned int slice,
@@ -2175,12 +2177,11 @@ void FECS_DGPort_getRTVal(
 {
   FECS_TRY_CLEARERROR
   GETSMARTPTRVOID(DGPortImplPtr, port)
-  result = port->getRTVal_lockType(lockType, evaluate, slice);
+  result = port->getRTVal(evaluate, slice);
   FECS_CATCH_VOID
 }
 
 bool FECS_DGPort_setRTVal(
-  FECS_LockType lockType,
   FECS_DGPortRef ref,
   const FabricCore::RTVal & value,
   unsigned int slice
@@ -2188,7 +2189,7 @@ bool FECS_DGPort_setRTVal(
 {
   FECS_TRY_CLEARERROR
   GETSMARTPTR(DGPortImplPtr, port, false)
-  return port->setRTVal_lockType(lockType, value, slice);
+  return port->setRTVal(value, slice);
   FECS_CATCH(false);
 }
 
@@ -2201,7 +2202,6 @@ unsigned int FECS_DGPort_getArrayCount(FECS_DGPortRef ref, unsigned int slice)
 }
 
 bool FECS_DGPort_getArrayData(
-  FECS_LockType lockType,
   FECS_DGPortRef ref,
   void * buffer,
   unsigned int bufferSize,
@@ -2210,12 +2210,11 @@ bool FECS_DGPort_getArrayData(
 {
   FECS_TRY_CLEARERROR
   GETSMARTPTR(DGPortImplPtr, port, false)
-  return port->getArrayData_lockType(lockType, buffer, bufferSize, slice);
+  return port->getArrayData(buffer, bufferSize, slice);
   FECS_CATCH(false);
 }
 
 bool FECS_DGPort_setArrayData(
-  FECS_LockType lockType,
   FECS_DGPortRef ref,
   void * buffer,
   unsigned int bufferSize,
@@ -2224,7 +2223,7 @@ bool FECS_DGPort_setArrayData(
 {
   FECS_TRY_CLEARERROR
   GETSMARTPTR(DGPortImplPtr, port, false)
-  return port->setArrayData_lockType(lockType, buffer, bufferSize, slice);
+  return port->setArrayData(buffer, bufferSize, slice);
   FECS_CATCH(false);
 }
 

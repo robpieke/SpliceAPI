@@ -189,10 +189,18 @@ namespace FabricSpliceImpl
     static bool checkErrors(std::string * errorOut = NULL);
 
     /// evaluates a provided FabricCore::DGNode
-    bool evaluate(FabricCore::DGNode dgNode, std::string * errorOut = NULL);
+    bool evaluate(
+        FabricCore::LockType lockType,
+        FabricCore::DGNode dgNode,
+        std::string * errorOut = NULL
+        );
 
     /// evaluates a FabricCore::DGNode based on its name
-    bool evaluate(const std::string & name = "", std::string * errorOut = NULL);
+    bool evaluate(
+        FabricCore::LockType lockType,
+        const std::string & name = "",
+        std::string * errorOut = NULL
+        );
 
     /// clears the evaluation state
     bool clearEvaluate(std::string * errorOut = NULL);

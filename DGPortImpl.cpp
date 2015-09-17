@@ -134,7 +134,7 @@ FabricCore::Variant DGPortImpl::getVariant(uint32_t slice, std::string * errorOu
   }
 
   if(mMode != Mode_IN)
-    if(!node->evaluate(mDGNode, errorOut))
+    if(!node->evaluate(FabricCore::LockType_Exclusive, mDGNode, errorOut))
       return FabricCore::Variant();
 
   try
@@ -245,8 +245,7 @@ FabricCore::Variant DGPortImpl::getDefault(std::string * errorOut)
   return result;
 }
 
-FabricCore::RTVal DGPortImpl::getRTVal_lockType(
-  FabricCore::LockType lockType,
+FabricCore::RTVal DGPortImpl::getRTVal(
   bool evaluate,
   uint32_t slice,
   std::string * errorOut
@@ -265,13 +264,13 @@ FabricCore::RTVal DGPortImpl::getRTVal_lockType(
   }
 
   if(mMode != Mode_IN && evaluate)
-    if(!node->evaluate(mDGNode, errorOut))
+    if(!node->evaluate(FabricCore::LockType_Exclusive, mDGNode, errorOut))
       return FabricCore::RTVal();
 
   try
   {
     FabricCore::RTVal result =
-      mDGNode.getMemberSliceValue_lockType(lockType, mMember.c_str(), slice);
+      mDGNode.getMemberSliceValue(mMember.c_str(), slice);
     return result;
   }
   catch(FabricCore::Exception e)
@@ -281,8 +280,7 @@ FabricCore::RTVal DGPortImpl::getRTVal_lockType(
   return FabricCore::RTVal();
 }
 
-bool DGPortImpl::setRTVal_lockType(
-  FabricCore::LockType lockType,
+bool DGPortImpl::setRTVal(
   FabricCore::RTVal value,
   uint32_t slice,
   std::string * errorOut
@@ -295,7 +293,7 @@ bool DGPortImpl::setRTVal_lockType(
 
   try
   {
-    mDGNode.setMemberSliceValue_lockType(lockType, mMember.c_str(), slice, value);
+    mDGNode.setMemberSliceValue(mMember.c_str(), slice, value);
   }
   catch(FabricCore::Exception e)
   {
@@ -329,7 +327,7 @@ uint32_t DGPortImpl::getArrayCount(uint32_t slice, std::string * errorOut)
     LoggingImpl::reportError("DGPortImpl::getArrayCount, Node '"+mGraphName+"' already destroyed.");
     return 0;
   }
-  if(!node->evaluate(mDGNode, errorOut))
+  if(!node->evaluate(FabricCore::LockType_Exclusive, mDGNode, errorOut))
     return 0;
 
   try
@@ -344,8 +342,7 @@ uint32_t DGPortImpl::getArrayCount(uint32_t slice, std::string * errorOut)
   return 0;
 }
 
-bool DGPortImpl::getArrayData_lockType(
-  FabricCore::LockType lockType,
+bool DGPortImpl::getArrayData(
   void * buffer,
   uint32_t bufferSize,
   uint32_t slice,
@@ -365,13 +362,13 @@ bool DGPortImpl::getArrayData_lockType(
   DGGraphImplPtr node = getDGGraph();
   if(!node)
     return LoggingImpl::reportError("DGPortImpl::getArrayData, Node '"+mGraphName+"' already destroyed.");
-  if(!node->evaluate(mDGNode, errorOut))
+  if(!node->evaluate(FabricCore::LockType_Exclusive, mDGNode, errorOut))
     return false;
 
   uint32_t count = 0;
   try
   {
-    count = mDGNode.getMemberSliceArraySize_lockType(lockType, mMember.c_str(), slice);
+    count = mDGNode.getMemberSliceArraySize(mMember.c_str(), slice);
   }
   catch(FabricCore::Exception e)
   {
@@ -386,7 +383,7 @@ bool DGPortImpl::getArrayData_lockType(
 
   try
   {
-    mDGNode.getMemberSliceArrayData_lockType(lockType, mMember.c_str(), slice, bufferSize, buffer);
+    mDGNode.getMemberSliceArrayData(mMember.c_str(), slice, bufferSize, buffer);
   }
   catch(FabricCore::Exception e)
   {
@@ -396,8 +393,7 @@ bool DGPortImpl::getArrayData_lockType(
   return true;
 }
 
-bool DGPortImpl::setArrayData_lockType(
-  FabricCore::LockType lockType,
+bool DGPortImpl::setArrayData(
   void * buffer,
   uint32_t bufferSize,
   uint32_t slice,
@@ -421,10 +417,10 @@ bool DGPortImpl::setArrayData_lockType(
 
   try
   {
-    if ( mDGNode.getMemberSliceArraySize_lockType( lockType, mMember.c_str(), slice ) != bufferCount )
+    if ( mDGNode.getMemberSliceArraySize( mMember.c_str(), slice ) != bufferCount )
       mDGNode.setMemberSliceArraySize( mMember.c_str(), slice, bufferCount );
     if(bufferCount >  0)
-      mDGNode.setMemberSliceArrayData_lockType(lockType, mMember.c_str(), slice, bufferSize, buffer);
+      mDGNode.setMemberSliceArrayData(mMember.c_str(), slice, bufferSize, buffer);
   }
   catch(FabricCore::Exception e)
   {
@@ -451,7 +447,7 @@ bool DGPortImpl::getAllSlicesData(void * buffer, uint32_t bufferSize, std::strin
   DGGraphImplPtr node = getDGGraph();
   if(!node)
     return LoggingImpl::reportError("DGPortImpl::getAllSlicesData, Node '"+mGraphName+"' already destroyed.");
-  if(!node->evaluate(mDGNode, errorOut))
+  if(!node->evaluate(FabricCore::LockType_Exclusive, mDGNode, errorOut))
     return false;
 
   uint32_t sliceCount = mDGNode.getSize();
@@ -530,7 +526,7 @@ bool DGPortImpl::copyArrayDataFromDGPort(DGPortImplPtr other, uint32_t slice, ui
   DGGraphImplPtr otherNode = other->getDGGraph();
   if(!otherNode)
     return LoggingImpl::reportError("DGPortImpl::copyArrayDataFromDGPort, Node '"+other->mGraphName+"' already destroyed.");
-  if(!otherNode->evaluate(other->mDGNode, errorOut))
+  if(!otherNode->evaluate(FabricCore::LockType_Exclusive, other->mDGNode, errorOut))
     return false;
 
   uint32_t otherSlice = otherSliceHint;
@@ -557,8 +553,8 @@ bool DGPortImpl::copyArrayDataFromDGPort(DGPortImplPtr other, uint32_t slice, ui
     buffer = malloc(bufferSize);
     try
     {
-      other->mDGNode.getMemberSliceArrayData_lockType(
-        FabricCore::LockType_Shared, other->mMember.c_str(), otherSlice, bufferSize, buffer
+      other->mDGNode.getMemberSliceArrayData(
+        other->mMember.c_str(), otherSlice, bufferSize, buffer
         );
     }
     catch(FabricCore::Exception e)
@@ -624,7 +620,7 @@ bool DGPortImpl::copyAllSlicesDataFromDGPort(DGPortImplPtr other, bool resizeTar
   DGGraphImplPtr otherNode = other->getDGGraph();
   if(!otherNode)
     return LoggingImpl::reportError("DGPortImpl::copyAllSlicesDataFromDGPort, Node '"+other->mGraphName+"' already destroyed.");
-  if(!otherNode->evaluate(other->mDGNode, errorOut))
+  if(!otherNode->evaluate(FabricCore::LockType_Exclusive, other->mDGNode, errorOut))
     return false;
 
   uint32_t bufferSize = mDataSize * sliceCount;
