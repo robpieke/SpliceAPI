@@ -200,6 +200,16 @@ DGGraphImpl::DGGraphImpl(
   mUserPointer = NULL;
   mIsReferenced = false;
 
+  static bool haveDefaultEvaluateShared = false;
+  static bool defaultEvaluateShared;
+  if ( !haveDefaultEvaluateShared )
+  {
+    char const *envvar = ::getenv( "FABRIC_SPLICE_PARALLEL_DEFAULT" );
+    defaultEvaluateShared = envvar && atoi( envvar ) > 0;
+    haveDefaultEvaluateShared = true;
+  }
+  mEvaluateShared = defaultEvaluateShared;
+
   try
   {
     if(sInstanceCount == 0 && sClient == NULL)
@@ -674,7 +684,6 @@ char const * DGGraphImpl::getDGNodeName(unsigned int index)
 }
 
 bool DGGraphImpl::evaluate(
-  FabricCore::LockType lockType,
   FabricCore::DGNode dgNode,
   std::string * errorOut
   )
@@ -694,7 +703,11 @@ bool DGGraphImpl::evaluate(
 
   try
   {
-    dgNode.evaluate_lockType( lockType );
+    dgNode.evaluate_lockType(
+      mEvaluateShared?
+        FabricCore::LockType_Shared:
+        FabricCore::LockType_Exclusive
+        );
     mEvalContext.callMethod("", "_clear", 0, 0);
   }
   catch(FabricCore::Exception e)
@@ -707,7 +720,6 @@ bool DGGraphImpl::evaluate(
 }
 
 bool DGGraphImpl::evaluate(
-  FabricCore::LockType lockType,
   const std::string & name,
   std::string * errorOut
   )
@@ -717,7 +729,7 @@ bool DGGraphImpl::evaluate(
   FabricCore::DGNode dgNode = getDGNode(name);
   if(!dgNode.isValid())
     return LoggingImpl::reportError("DGNode '"+name+"' does not exist.", errorOut);
-  return evaluate(lockType, dgNode, errorOut);
+  return evaluate(dgNode, errorOut);
 }
 
 bool DGGraphImpl::clearEvaluate(std::string * errorOut)
@@ -2479,6 +2491,12 @@ FabricCore::Variant DGGraphImpl::getPersistenceDataDict(const PersistenceInfo * 
 
   if(mMetaData.length() > 0)
     dataVar.setDictValue("metaData", FabricCore::Variant::CreateString(mMetaData.c_str()));
+
+  if ( mEvaluateShared )
+    dataVar.setDictValue(
+      "evaluateShared",
+      FabricCore::Variant::CreateBoolean( mEvaluateShared )
+      );
 
   FabricCore::RTVal persistenceContextRT = FabricSplice::constructObjectRTVal("PersistenceContext");
   persistenceContextRT = persistenceContextRT.callMethod("PersistenceContext", "getInstance", 0, 0);

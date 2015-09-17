@@ -190,14 +190,12 @@ namespace FabricSpliceImpl
 
     /// evaluates a provided FabricCore::DGNode
     bool evaluate(
-        FabricCore::LockType lockType,
         FabricCore::DGNode dgNode,
         std::string * errorOut = NULL
         );
 
     /// evaluates a FabricCore::DGNode based on its name
     bool evaluate(
-        FabricCore::LockType lockType,
         const std::string & name = "",
         std::string * errorOut = NULL
         );
@@ -402,6 +400,7 @@ namespace FabricSpliceImpl
     bool mIsReferenced;
     std::string mFilePath;
     std::string mOriginalName;
+    bool mEvaluateShared;
 
     // static members
     static DGOperatorSuffixMap sDGOperatorSuffix;

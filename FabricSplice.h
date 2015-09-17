@@ -1947,10 +1947,7 @@ FECS_DECL char const * FECS_DGGraph_getKLOperatorName(FECS_DGGraphRef ref, unsig
 FECS_DECL unsigned int FECS_DGGraph_getGlobalKLOperatorCount();
 FECS_DECL char const * FECS_DGGraph_getGlobalKLOperatorName(unsigned int index);
 FECS_DECL bool FECS_DGGraph_checkErrors();
-FECS_DECL bool FECS_DGGraph_evaluate(
-  FECS_DGGraphRef ref,
-  FEC_LockType lockType
-  );
+FECS_DECL bool FECS_DGGraph_evaluate(FECS_DGGraphRef ref);
 FECS_DECL bool FECS_DGGraph_clearEvaluate(FECS_DGGraphRef ref);
 FECS_DECL bool FECS_DGGraph_usesEvalContext(FECS_DGGraphRef ref);
 FECS_DECL bool FECS_DGGraph_requireEvaluate(FECS_DGGraphRef ref);
@@ -4400,9 +4397,9 @@ namespace FabricSplice
     }
 
     // evaluates the contained DGNode
-    bool evaluate( FabricCore::LockType lockType )
+    bool evaluate()
     {
-      bool result = FECS_DGGraph_evaluate(mRef, lockType);
+      bool result = FECS_DGGraph_evaluate(mRef);
       Exception::MaybeThrow();
       return result;
     }

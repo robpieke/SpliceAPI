@@ -1754,14 +1754,11 @@ bool FECS_DGGraph_checkErrors()
   FECS_CATCH(false);
 }
 
-bool FECS_DGGraph_evaluate(
-  FECS_DGGraphRef ref,
-  FEC_LockType lockType
-  )
+bool FECS_DGGraph_evaluate(FECS_DGGraphRef ref)
 {
   FECS_TRY_CLEARERROR
   GETSMARTPTR(DGGraphImplPtr, graph, false)
-  return graph->evaluate( lockType );
+  return graph->evaluate();
   FECS_CATCH(false);
 }
 
