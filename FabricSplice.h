@@ -1048,6 +1048,14 @@ FabricSplice::DGPort
 
 The DGPort class allows to get or set :ref:`dggraph` data. DGPorts can communicate with the FabricCore layer in various ways.
 
+.. note::
+  
+  When accessing data on instances of FabricSplice::DGPort, eg. through
+  :code:`DGPort::getRTVal()`, it is the responsibility of the client to ensure
+  that accesses to data on the same port are synchronized, ie. that two threads
+  don't try to change the value at the same time.  However, it is safe to access
+  data on different instances of FabricSplice::DFGPort without locking.
+  
 Example
 ---------------------------------
 
@@ -1126,7 +1134,6 @@ The sample below shows how to use ports. The class outline can be found at the e
       Finalize();
       return 0;
     }
-
 
 Class Outline
 ---------------------------------
