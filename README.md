@@ -20,7 +20,7 @@ Building
 A scons (http://www.scons.org/) build script is provided. Fabric Splice API depends on
 * A static build of boost (http://www.boost.org/), version 1.55 or higher.
 * A dynamic build of Fabric Core (matching the latest version).
-* FTL (Fabric Template Library). You can pull the FTL repository here: https://github.com/fabric-engine/FTL.
+* The FTL (Fabric Template Library) repository (it can be pulled here: https://github.com/fabric-engine/FTL).
 
 To inform scons where to find the Fabric Core includes as well as the thirdparty libraries, you need to set the following environment variables:
 
