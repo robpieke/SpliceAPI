@@ -404,6 +404,9 @@ Class Outline
         public:
           AutoTimer(std::string const &name);
           ~AutoTimer();
+          const char * getName();
+          void resume();
+          void stop();
 
         private:
           std::string mName;
@@ -3588,6 +3591,21 @@ namespace FabricSplice
       ~AutoTimer()
       {
         Logging::stopTimer(mName.c_str());
+      }
+
+      const char * getName()
+      {
+        return mName.c_str();
+      }
+
+      void resume()
+      {
+        startTimer(getName());
+      }
+
+      void stop()
+      {
+        stopTimer(getName());
       }
 
     private:
