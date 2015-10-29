@@ -53,8 +53,8 @@ void klReportFunc(
 void klStatusFunc(void *userdata, char const *destData, uint32_t destLength,
   char const *payloadData, uint32_t payloadLength)
 {
-  std::string topic(destData);
-  std::string message(payloadData);
+  std::string topic(destData, destLength);
+  std::string message(payloadData, payloadLength);
   StatusFunc statusFunc = LoggingImpl::getKLStatusFunc();
   if(statusFunc == NULL)
     printf("%s: %s\n", topic.c_str(), message.c_str());
