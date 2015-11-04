@@ -30,6 +30,7 @@ DGGraphImpl::DGOperatorMap DGGraphImpl::sDGOperators;
 DGGraphImpl::DGOperatorSuffixMap DGGraphImpl::sDGOperatorSuffix;
 FabricServices::Persistence::RTValToJSONEncoder sRTValEncoder;
 FabricServices::Persistence::RTValFromJSONDecoder sRTValDecoder;
+FabricCore::ClientLicenseType DGGraphImpl::sCoreLicenseType = UINT8_MAX;
 
 stringVector DGGraphImpl::sExtFolders;
 DGGraphImpl::GetOperatorSourceCodeFunc DGGraphImpl::sGetOperatorSourceCodeFunc = NULL;
@@ -85,7 +86,12 @@ const FabricCore::Client * DGGraphImpl::constructClient(bool guarded, FabricCore
       options.guarded = 0;
     options.traceOperators = 0;
     options.optimizationType = optType;
-    options.licenseType = FabricCore::ClientLicenseType_Interactive;
+
+    if (sCoreLicenseType == UINT8_MAX)
+      throw FabricCore::Exception(
+        "Cannot create Core Client, the License Type is not set" );
+    options.licenseType = sCoreLicenseType;
+
     options.rtValToJSONEncoder = &sRTValEncoder;
     options.rtValFromJSONDecoder = &sRTValDecoder;
 
@@ -104,7 +110,6 @@ const FabricCore::Client * DGGraphImpl::constructClient(bool guarded, FabricCore
     }
     options.numExtsToLoad = 0;
     options.slowOperationCallback = &klSlowOperationFunc;
-    options.licenseType = FabricCore::ClientLicenseType_Interactive;
 
     sClient = new FabricCore::Client(&klReportFunc, 0, &options);
 
@@ -163,6 +168,11 @@ const FabricCore::Client * DGGraphImpl::constructClient(bool guarded, FabricCore
     sDrawingScope = FabricCore::RTVal::Create(*sClient, "InlineDrawingScope", 0, 0);
   }
   return (const FabricCore::Client *)sClient;
+}
+
+void DGGraphImpl::setLicenseType(FabricCore::ClientLicenseType licenseType)
+{
+  sCoreLicenseType = licenseType;
 }
 
 bool DGGraphImpl::destroyClient(bool force)

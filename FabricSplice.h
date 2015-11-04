@@ -1774,6 +1774,7 @@ FECS_DECL uint8_t FECS_GetFabricVersionRev();
 FECS_DECL const char * FECS_GetFabricVersionStr();
 FECS_DECL const char * FECS_GetSpliceVersion();
 FECS_DECL void FECS_constructClient(FabricCore::Client & client, int guarded, FabricCore::ClientOptimizationType optType);
+FECS_DECL void FECS_setLicenseType(FabricCore::ClientLicenseType licenseType);
 FECS_DECL bool FECS_destroyClient(bool force);
 FECS_DECL char const * FECS_GetClientContextID();
 FECS_DECL bool FECS_addExtFolder(const char * folder);
@@ -2150,6 +2151,12 @@ namespace FabricSplice
     FECS_constructClient(result, guarded, optType);
     Exception::MaybeThrow();
     return result;
+  }
+
+  inline void SetLicenseType(FabricCore::ClientLicenseType licenseType)
+  {
+    FECS_setLicenseType(licenseType);
+    Exception::MaybeThrow();
   }
 
   inline bool DestroyClient(bool force = false)

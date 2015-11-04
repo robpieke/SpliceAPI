@@ -31,6 +31,8 @@ namespace FabricSpliceImpl
     // create the FabricCore client
     static const FabricCore::Client * constructClient(bool guarded = true, FabricCore::ClientOptimizationType optType = FabricCore::ClientOptimizationType_Synchronous);
 
+    static void setLicenseType(FabricCore::ClientLicenseType licenseType);
+
     // destroy the FabricCore client
     static bool destroyClient(bool force = false);
 
@@ -419,6 +421,7 @@ namespace FabricSpliceImpl
     static stringVector sRTFolders;
     static stringVector sExtFolders;
     static GetOperatorSourceCodeFunc sGetOperatorSourceCodeFunc;
+    static FabricCore::ClientLicenseType sCoreLicenseType;
 
     // utilities
     bool memberPersistence(const std::string &name, const std::string &type, bool * requiresStorage = NULL);

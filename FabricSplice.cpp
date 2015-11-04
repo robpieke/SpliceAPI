@@ -107,6 +107,13 @@ void FECS_constructClient(FabricCore::Client & client, int guarded, FabricCore::
   FECS_CATCH_VOID
 }
 
+FECS_DECL void FECS_setLicenseType(FabricCore::ClientLicenseType licenseType)
+{
+  FECS_TRY_CLEARERROR
+  DGGraphImpl::setLicenseType(licenseType);
+  FECS_CATCH_VOID
+}
+
 FECS_DECL bool FECS_destroyClient(bool force)
 {
   FECS_TRY_CLEARERROR
