@@ -146,7 +146,7 @@ if FABRIC_BUILD_OS == 'Windows':
       'libboost_filesystem-vc120-mt-s-1_55.lib'
       ]
 else:
-  boostFlags['LIBS'] = ['boost_thread','boost_system','boost_filesystem']
+  boostFlags['LIBS'] = ['boost_thread-mt','boost_system-mt','boost_filesystem-mt']
 Export('boostFlags')
 
 parentEnv.MergeFlags(boostFlags)
