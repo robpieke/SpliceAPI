@@ -32,6 +32,7 @@ if not os.path.exists(spliceEnv.Dir('.stage').abspath):
   dirs = ['.'],
   exports = {
     'parentEnv': spliceEnv,
+    'FTL_INCLUDE_DIR': os.environ['FTL_INCLUDE_DIR'],
     'FABRIC_DIR': os.environ['FABRIC_DIR'],
     'FABRIC_SPLICE_VERSION': os.environ['FABRIC_SPLICE_VERSION'],
     'FABRIC_BUILD_TYPE': os.environ['FABRIC_BUILD_TYPE'],
